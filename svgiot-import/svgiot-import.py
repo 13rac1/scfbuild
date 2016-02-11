@@ -43,7 +43,7 @@ class NoCodePointsException(Exception):
 
 class SVGiOTImport:
 
-    def __init__(self, src_font, src_svg_path, dest_font):
+    def __init__(self, src_font, src_svg_path, dest_font, transform=None):
 
         font = TTFont(src_font)
         codepoint_names = self.get_codepoint_names(font)
@@ -57,7 +57,7 @@ class SVGiOTImport:
             try:
                 glyph_name = codepoint_names[codepoint]
             except KeyError:
-                print("WARNING: No codepoint found for: {}".format(
+                print("WARNING: No Unicode Code Point found for: {}".format(
                     file_path), file=sys.stderr)
                 continue
 
@@ -66,10 +66,13 @@ class SVGiOTImport:
             svg = self.read_file(file_path)
             svg = self.svg_add_glyph_id(svg, glyph_id)
             svg = self.svg_add_xml_header(svg)
+            if transform:
+                svg = self.svg_add_transform(svg, transform)
 
             svg_list.append([svg, glyph_id, glyph_id])
 
         svg_table = table_S_V_G_()
+        # The SVG table must be sorted by glyph_id
         svg_table.docList = sorted(svg_list, key=lambda table: table[1])
         svg_table.colorPalettes = None
         font['SVG '] = svg_table
@@ -121,20 +124,27 @@ class SVGiOTImport:
             svg = xml_header + svg
         return svg
 
+    def svg_add_transform(self, svg, transform):
+        old = '<svg '
+        new = '<svg transform="{}" '.format(transform)
+
+        return str.replace(svg, old, new)
+
 
 def main():
     parser = optparse.OptionParser(
         "usage: %prog src_font src_svg_directory dest_font")
 
     # TODO: Option - Remove all glyphs not matched with SVG.
-    # TODO: Option - Apply transform all SVG files.
+    parser.add_option("-t", "--transform", dest="transform",
+                      help="Add transform to each imported SVG")
 
     (options, args) = parser.parse_args()
 
     if len(args) != 3:
         parser.error("Incorrect number of arguments")
 
-    SVGiOTImport(args[0], args[1], args[2])
+    SVGiOTImport(args[0], args[1], args[2], options.transform)
 
 
 if __name__ == "__main__":
