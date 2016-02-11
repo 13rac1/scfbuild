@@ -54,7 +54,6 @@ class SVGiOTImport:
             (filename, _) = os.path.splitext(os.path.basename(file_path))
             # Convert unicode filename to decimal.
             codepoint = int(filename, 16)
-            print("Current: " + filename)
             try:
                 glyph_name = codepoint_names[codepoint]
             except KeyError:
@@ -115,9 +114,12 @@ class SVGiOTImport:
 
         return str.replace(svg, old, new)
 
-    def svg_add_xml_head(self, svg):
-        # TODO: Check if it's there first.
-        svg = '<?xml version="1.0" encoding="UTF-8"?>' + svg
+    def svg_add_xml_header(self, svg):
+        xml_header = '<?xml version="1.0" encoding="UTF-8"?>'
+
+        if xml_header not in svg:
+            svg = xml_header + svg
+        return svg
 
 
 def main():
