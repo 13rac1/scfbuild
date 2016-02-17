@@ -7,3 +7,4 @@ display full-color vector glyphs in supported systems.
 the W3C on Jan 27th 2016 as part of Open Font Format and OpenType specifications.
 
 
+NOTE: Firefox requires restart to reload an updated font.
