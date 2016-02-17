@@ -7,12 +7,14 @@ import glob
 import logging
 import os
 import sys
+import tempfile
 
 from fontTools.ttLib import TTFont
 from fontTools.ttLib.tables.S_V_G_ import table_S_V_G_
 
 from . import fforge
 from . import ftools
+from . import util
 
 logger = logging.getLogger('smfbuilder.Builder')
 
@@ -21,12 +23,24 @@ class Builder(object):
 
     def run(self, glyph_svg_dir, output_file, options=None):
         ff_font = fforge.create_font()
-        # Find regular glyphs
-        # Add regular glyphs
-        # Save to tmp file
-        # Open tmp file
-        # Add SVGinOT glyphs
-        # Save as output file.
+        # Find and add regular glyphs
+        svg_filepaths = self.get_svg_filepaths(glyph_svg_dir)
+
+        fforge.add_svg_glyphs(ff_font, svg_filepaths)
+        ff_font.autoHint()
+
+        tmp_dir = tempfile.mkdtemp()
+        tmp_file = os.path.join(tmp_dir, "tmp.ttf")
+
+        ff_font.generate(tmp_file)
+
+        self.add_color_svg(
+            tmp_file, options.color_svg_dir, output_file, options.transform)
+
+        os.remove(tmp_file)
+        os.rmdir(tmp_dir)
+
+        return 0
 
     def add_color_svg(self, src_font, src_svg_path, dest_font, transform=None):
 
@@ -35,10 +49,9 @@ class Builder(object):
         svg_filepaths = self.get_svg_filepaths(src_svg_path)
         svg_list = []
 
-        for file_path in svg_filepaths:
-            (filename, _) = os.path.splitext(os.path.basename(file_path))
-            # Convert unicode filename to decimal.
-            codepoint = int(filename, 16)
+        for filepath in svg_filepaths:
+            codepoint = util.codepoint_from_filepath(filepath)
+
             try:
                 glyph_name = codepoint_names[codepoint]
             except KeyError:
@@ -48,7 +61,7 @@ class Builder(object):
 
             glyph_id = font.getGlyphID(glyph_name)
 
-            data = self.read_file(file_path)
+            data = self.read_file(filepath)
             data = self.add_glyph_id(data, glyph_id)
             data = self.add_xml_header(data)
             if transform:
@@ -64,14 +77,14 @@ class Builder(object):
 
         font.save(dest_font)
 
-    def get_svg_filepaths(self, src_svg_dir):
+    def get_svg_filepaths(self, svg_dir):
         svg_files = []
         # Match all four and five character files only
         # TODO: Handle multi-character Unicode modifiers (colors and flags)
         # using Font Ligatures
-        for filename in glob.glob(os.path.join(src_svg_dir, '????.svg')):
+        for filename in glob.glob(os.path.join(svg_dir, '????.svg')):
             svg_files.append(filename)
-        for filename in glob.glob(os.path.join(src_svg_dir, '?????.svg')):
+        for filename in glob.glob(os.path.join(svg_dir, '?????.svg')):
             svg_files.append(filename)
 
         return svg_files
@@ -94,10 +107,10 @@ class Builder(object):
         old = '<svg '
         new = '<svg id="glyph{}" '.format(id)
 
-        return str.replace(svg, old, new)
+        return svg.replace(old, new)
 
     def add_transform(self, svg, transform):
         old = '<svg '
         new = '<svg transform="{}" '.format(transform)
 
-        return str.replace(svg, old, new)
+        return svg.replace(old, new)

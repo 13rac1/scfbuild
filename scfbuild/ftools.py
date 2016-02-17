@@ -22,7 +22,7 @@ class NoCodePointsException(Exception):
     pass
 
 
-def get_codepoint_names(self, font):
+def get_codepoint_names(font):
     codepoints = {}
     for subtable in font['cmap'].tables:
         if subtable.isUnicode():
