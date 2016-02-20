@@ -11,6 +11,9 @@ import sys
 import fontTools as fonttools
 from distutils.version import StrictVersion
 
+from . import util
+
+
 # Support for SVG tables was added to fontTools in version 2.5
 if StrictVersion('2.5') > StrictVersion(fonttools.version):
     print("ERROR: The FontTools module version must be 2.5 or higher.",
@@ -34,3 +37,19 @@ def get_codepoint_names(font):
             'No Unicode Code Points found in font.')
 
     return codepoints
+
+
+def get_glyph_id(font, codepoint_names, filepath):
+    (codepoint, filename) = util.codepoint_from_filepath(filepath)
+
+    try:
+        glyph_name = codepoint_names[codepoint]
+    except KeyError:
+        glyph_id = font.getGlyphID(filename)
+
+        if glyph_id is -1:
+            print("WARNING: No Unicode Code Point found for: {}".format(
+                filename), file=sys.stderr)
+        return glyph_id
+
+    return font.getGlyphID(glyph_name)

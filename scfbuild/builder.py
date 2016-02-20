@@ -32,6 +32,8 @@ class Builder(object):
         tmp_dir = tempfile.mkdtemp()
         tmp_file = os.path.join(tmp_dir, "tmp.ttf")
 
+        # TODO: Validate ligature tables to avoid warning during generate
+        # "Lookup subtable contains unused glyph one making the whole subtable invalid"
         ff_font.generate(tmp_file)
 
         self.add_color_svg(
@@ -40,6 +42,7 @@ class Builder(object):
         os.remove(tmp_file)
         os.rmdir(tmp_dir)
 
+        # 0 for success
         return 0
 
     def add_color_svg(self, src_font, src_svg_path, dest_font, transform=None):
@@ -50,16 +53,7 @@ class Builder(object):
         svg_list = []
 
         for filepath in svg_filepaths:
-            codepoint = util.codepoint_from_filepath(filepath)
-
-            try:
-                glyph_name = codepoint_names[codepoint]
-            except KeyError:
-                print("WARNING: No Unicode Code Point found for: {}".format(
-                    file_path), file=sys.stderr)
-                continue
-
-            glyph_id = font.getGlyphID(glyph_name)
+            glyph_id = ftools.get_glyph_id(font, codepoint_names, filepath)
 
             data = self.read_file(filepath)
             data = self.add_glyph_id(data, glyph_id)
@@ -79,12 +73,7 @@ class Builder(object):
 
     def get_svg_filepaths(self, svg_dir):
         svg_files = []
-        # Match all four and five character files only
-        # TODO: Handle multi-character Unicode modifiers (colors and flags)
-        # using Font Ligatures
-        for filename in glob.glob(os.path.join(svg_dir, '????.svg')):
-            svg_files.append(filename)
-        for filename in glob.glob(os.path.join(svg_dir, '?????.svg')):
+        for filename in glob.glob(os.path.join(svg_dir, '*.svg')):
             svg_files.append(filename)
 
         return svg_files

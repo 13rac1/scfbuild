@@ -58,6 +58,7 @@ def main():
     # --name
     # --familyname
     # --fullname
+    # --zwj-dupes - Attempt to add Zero Width Joiner duplicate ligatures
 
     (options, args) = parser.parse_args()
 
