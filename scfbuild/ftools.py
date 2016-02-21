@@ -9,20 +9,9 @@ from __future__ import (absolute_import, division, print_function,
 import sys
 
 import fontTools as fonttools
-from distutils.version import StrictVersion
+
 
 from . import util
-
-
-# Support for SVG tables was added to fontTools in version 2.5
-if StrictVersion('2.5') > StrictVersion(fonttools.version):
-    print("ERROR: The FontTools module version must be 2.5 or higher.",
-          file=sys.stderr)
-    sys.exit(1)
-
-
-class NoCodePointsException(Exception):
-    pass
 
 
 def get_codepoint_names(font):

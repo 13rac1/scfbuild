@@ -8,7 +8,9 @@ import logging
 import os
 import sys
 import tempfile
+from distutils.version import StrictVersion
 
+import fontTools
 from fontTools.ttLib import TTFont
 from fontTools.ttLib.tables.S_V_G_ import table_S_V_G_
 
@@ -16,49 +18,73 @@ from . import fforge
 from . import ftools
 from . import util
 
-logger = logging.getLogger('smfbuilder.Builder')
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
+
+# Support for SVG tables was added to fontTools in version 2.5
+if StrictVersion('2.5') > StrictVersion(fontTools.version):
+    logger.exception("The FontTools module version must be 2.5 or higher.")
+    sys.exit(1)
+
+
+class NoCodePointsException(Exception):
+    pass
 
 
 class Builder(object):
 
-    def run(self, glyph_svg_dir, output_file, options=None):
+    def __init__(self, glyph_svg_dir, output_file, options=None):
+        self.glyph_svg_dir = glyph_svg_dir
+        self.output_file = output_file
+        self.options = options
 
+    def run(self):
+
+        logger.info("Creating a new font")
         ff_font = fforge.create_font()
+
         # Find and add regular glyphs
-        svg_filepaths = self.get_svg_filepaths(glyph_svg_dir)
+        svg_filepaths = self.get_svg_filepaths(self.glyph_svg_dir)
+        logger.info("Adding glyphs and ligatures")
         fforge.add_glyphs(ff_font, svg_filepaths)
 
         tmp_dir = tempfile.mkdtemp()
         tmp_file = os.path.join(tmp_dir, "tmp.ttf")
+        logger.debug("Using temp file: %s", tmp_file)
 
         # TODO: Validate ligature tables to avoid warning during generate
-        # "Lookup subtable contains unused glyph one making the whole subtable invalid"
+        # "Lookup subtable contains unused glyph NAME making the whole subtable invalid"
+        logger.info("Generating intermediate font file")
         ff_font.generate(tmp_file)
+        del ff_font
 
-        self.add_color_svg(
-            tmp_file, options.color_svg_dir, output_file, options.transform)
+        logger.info("Adding SVGinOT SVG files")
+        font = TTFont(tmp_file)
+        self.add_color_svg(font)
+        logger.info("Saving output file: %s", self.output_file)
+        font.save(self.output_file)
 
+        # Cleaning Up
         os.remove(tmp_file)
         os.rmdir(tmp_dir)
 
+        logger.info("Done!")
         # 0 for success
         return 0
 
-    def add_color_svg(self, src_font, src_svg_path, dest_font, transform=None):
-
-        font = TTFont(src_font)
+    def add_color_svg(self, font):
+        # Get the name
         codepoint_names = ftools.get_codepoint_names(font)
-        svg_filepaths = self.get_svg_filepaths(src_svg_path)
+        svg_files = self.get_svg_filepaths(self.options.color_svg_dir)
         svg_list = []
 
-        for filepath in svg_filepaths:
+        for filepath in svg_files:
             glyph_id = ftools.get_glyph_id(font, codepoint_names, filepath)
 
             data = self.read_file(filepath)
             data = self.add_glyph_id(data, glyph_id)
-            data = self.add_xml_header(data)
-            if transform:
-                data = self.add_transform(data, transform)
+            if self.options.transform:
+                data = self.add_transform(data, self.options.transform)
 
             svg_list.append([data, glyph_id, glyph_id])
 
@@ -68,27 +94,14 @@ class Builder(object):
         svg_table.colorPalettes = None
         font['SVG '] = svg_table
 
-        font.save(dest_font)
-
     def get_svg_filepaths(self, svg_dir):
-        svg_files = []
-        for filename in glob.glob(os.path.join(svg_dir, '*.svg')):
-            svg_files.append(filename)
-
-        return svg_files
+        return [filename for filename in glob.glob(os.path.join(svg_dir, '*.svg'))]
 
     def read_file(self, file_path):
         f = open(file_path, "rt")
         data = f.read()
         f.close()
         return data
-
-    def add_xml_header(self, svg):
-        xml_header = '<?xml version="1.0" encoding="UTF-8"?>'
-
-        if xml_header not in svg:
-            svg = xml_header + svg
-        return svg
 
     def add_glyph_id(self, svg, id):
         # TODO: Don't assume the glyph id is missing.

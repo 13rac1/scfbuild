@@ -44,7 +44,8 @@ def main():
     parser.add_option("-c", "--color-svg-dir", dest="color_svg_dir",
                       metavar="DIR", help="color SVG source directory")
     parser.add_option("--transform", dest="transform",
-                      help="add a transform to the <svg> tag of each color SVG")
+                      help="add a transform to the <svg> tag of each color SVG. \
+                      Example \"translate(0 -800) scale(1.2)\"")
 
     # TODO: Options
     # -i --input
@@ -58,7 +59,6 @@ def main():
     # --name
     # --familyname
     # --fullname
-    # --zwj-dupes - Attempt to add Zero Width Joiner duplicate ligatures
 
     (options, args) = parser.parse_args()
 
@@ -66,8 +66,8 @@ def main():
         parser.error("glyph_svg_dir and output_file both are required.")
         return 1
 
-    builder = Builder()
-    return builder.run(args[0], args[1], options)
+    builder = Builder(args[0], args[1], options)
+    return builder.run()
 
 if __name__ == '__main__':
     main()
