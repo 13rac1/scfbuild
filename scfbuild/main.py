@@ -20,55 +20,57 @@
 """\
 SCFBuild - SVGinOT Color Font Builder
 
-Builds multicolor fonts following the SVG in OpenType specification.
-
-usage: %prog [OPTIONS] glyph_svg_dir output_file
-
-Arguments:
-  glyph_svg_dir         source directory for the primary/fallback single color
-                        SVG glyphs
-  output_file           output TTF file
 """
 
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
-import optparse
+import argparse
 
 from .builder import Builder
 
 
 def main():
-    parser = optparse.OptionParser(__doc__)
+    parser = argparse.ArgumentParser(description=__doc__)
 
-    parser.add_option("-c", "--color-svg-dir", dest="color_svg_dir",
-                      metavar="DIR", help="color SVG source directory")
-    parser.add_option("--transform", dest="transform",
-                      help="add a transform to the <svg> tag of each color SVG. \
-                      Example \"translate(0 -800) scale(1.2)\"")
-    parser.add_option("-v", "--verbose", dest="verbose", action="store_true",
-                      default=False, help="print detailed debug information")
+    parser.add_argument("output", help="output font file")
+    parser.add_argument("-g", "--glyph-dir", dest="glyph_svg_dir", metavar="DIR",
+                        help="directory of regular no-color SVG glyphs to add to the font")
+    parser.add_argument("-c", "--color-dir", dest="color_svg_dir", metavar="DIR",
+                        help="directory of SVGinOT color SVG glyphs to add to the font.")
+    parser.add_argument("--transform", dest="transform",
+                        help="add a transform to the <svg> tag of each color SVG. "
+                        "Example \"translate(0 -800) scale(1.2)\"")
+    parser.add_argument("--familyname", dest="familyname", default="Untitled",
+                        help="family name for the font. default: Untitled")
+    parser.add_argument("--weight", dest="weight", default="Regular",
+                        help="weight/syle for the font. default: Regular")
+    parser.add_argument("--fullname", dest="fullname",
+                        help="full name of the font. default: Family "
+                        "Name + Weight(if not 'Regular')")
+    parser.add_argument("--font-version", dest="version", default="1.0",
+                        help="version number for the font. default: 1.0")
+
+    parser.add_argument("-v", "--verbose", dest="verbose", action="store_true",
+                        default=False, help="print detailed debug information")
 
     # TODO: Options
-    # -i --input
+    # -i --input - Input file instead of making a new one.
     # -t --type TTF/WOFF
     # --remove-unused
-    #
-    # -q --quiet
     # --version
-    # --font-version
-    # --weight
-    # --name
-    # --familyname
-    # --fullname
 
-    (options, args) = parser.parse_args()
+    args = parser.parse_args()
 
-    if len(args) != 2:
-        parser.error("glyph_svg_dir and output_file both are required.")
+    if not args.glyph_svg_dir:
+        parser.error("--glyph-dir is required.")
         return 1
+    if not args.color_svg_dir:
+        parser.error("--color-dir is required.")
+        return 1
+    # TODO: Better Validation
 
-    builder = Builder(args[0], args[1], options)
+    builder = Builder(args.glyph_svg_dir, args.output, args)
     return builder.run()
 
 if __name__ == '__main__':
