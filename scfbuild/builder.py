@@ -15,7 +15,6 @@ from fontTools.ttLib import TTFont
 from fontTools.ttLib.tables.S_V_G_ import table_S_V_G_
 
 from . import fforge
-from . import ftools
 from . import util
 
 logger = logging.getLogger(__name__)
@@ -74,12 +73,12 @@ class Builder(object):
 
     def add_color_svg(self, font):
         # Get the name
-        codepoint_names = ftools.get_codepoint_names(font)
+        codepoint_names = self.get_codepoint_names(font)
         svg_files = self.get_svg_filepaths(self.options.color_svg_dir)
         svg_list = []
 
         for filepath in svg_files:
-            glyph_id = ftools.get_glyph_id(font, codepoint_names, filepath)
+            glyph_id = self.get_glyph_id(font, codepoint_names, filepath)
 
             data = self.read_file(filepath)
             data = self.add_glyph_id(data, glyph_id)
@@ -93,6 +92,34 @@ class Builder(object):
         svg_table.docList = sorted(svg_list, key=lambda table: table[1])
         svg_table.colorPalettes = None
         font['SVG '] = svg_table
+
+    def get_codepoint_names(self, font):
+        codepoints = {}
+        for subtable in font['cmap'].tables:
+            if subtable.isUnicode():
+                for codepoint, name in subtable.cmap.items():
+                    # NOTE: May overwrite previous values
+                    codepoints[codepoint] = name
+        if len(codepoints) is 0:
+            raise NoCodePointsException(
+                'No Unicode Code Points found in font.')
+
+        return codepoints
+
+    def get_glyph_id(self, font, codepoint_names, filepath):
+        (codepoint, filename) = util.codepoint_from_filepath(filepath)
+
+        try:
+            glyph_name = codepoint_names[codepoint]
+        except KeyError:
+            glyph_id = font.getGlyphID(filename)
+
+            if glyph_id is -1:
+                print("WARNING: No Unicode Code Point found for: {}".format(
+                    filename), file=sys.stderr)
+            return glyph_id
+
+        return font.getGlyphID(glyph_name)
 
     def get_svg_filepaths(self, svg_dir):
         return [filename for filename in glob.glob(os.path.join(svg_dir, '*.svg'))]
