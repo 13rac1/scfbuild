@@ -22,12 +22,11 @@ logger = logging.getLogger('smfbuilder.Builder')
 class Builder(object):
 
     def run(self, glyph_svg_dir, output_file, options=None):
+
         ff_font = fforge.create_font()
         # Find and add regular glyphs
         svg_filepaths = self.get_svg_filepaths(glyph_svg_dir)
-
-        fforge.add_svg_glyphs(ff_font, svg_filepaths)
-        ff_font.autoHint()
+        fforge.add_glyphs(ff_font, svg_filepaths)
 
         tmp_dir = tempfile.mkdtemp()
         tmp_file = os.path.join(tmp_dir, "tmp.ttf")

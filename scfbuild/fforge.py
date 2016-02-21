@@ -9,9 +9,13 @@ from __future__ import (absolute_import, division, print_function,
 import fontforge
 
 from . import util
+from .unicode import ZWJ_INT, VS16_INT, ZWJ_SEQUENCES
 
 
 def create_font():
+    """
+
+    """
 
     font = fontforge.font()
     font.encoding = 'UnicodeFull'
@@ -34,39 +38,65 @@ def create_font():
 
     # Add required font characters
     glyph = font.createChar(0x0000, 'NULL')
-    glyph.width = 250
+    glyph.width = 0
     glyph = font.createChar(0x000d, 'CR')
     glyph.width = 250
+    glyph = font.createChar(ZWJ_INT)
+    glyph.width = 0
+    glyph = font.createChar(VS16_INT)
+    glyph.width = 0
 
     return font
 
 
-def add_svg_glyphs(font, svg_filepaths):
+def add_glyphs(font, svg_filepaths):
+    """
+    Loop through all files and create regular or ligature glyphs for each.
+    """
     for filepath in svg_filepaths:
         (codepoint, filename) = util.codepoint_from_filepath(filepath)
 
+        # If code point is -1, then the final name is not a simple unicode id
+        # so make a glyph for use with ligatures
         if codepoint is -1:
+            # Example: 1f441-1f5e8.svg
+
+            # Create a gylph without a defined code point
             glyph = font.createChar(-1, filename)
 
-            liga = get_liga_tuple(filename)
-            # TODO: Add/check for standard ZJW alternatives
-            glyph.addPosSub('liga', liga)
+            # Creates a list of Unicode IDs from a string of hyphen separated
+            # Unicode IDs.
+            u_ids = [int(id, 16) for id in filename.split("-")]
+            # Example: (0x1f441, 0x1f5e8)
+
+            u_str = ''.join(map(unichr, u_ids))
+            # Example: "U\0001f441U\0001f5e8"
+
+            # Replace sequences with correct ZWJ/VS16 versions as needed
+            try:
+                u_str = ZWJ_SEQUENCES[u_str]
+                u_ids = map(ord, u_str)
+            except KeyError:
+                pass
+
+            # Create a tuple of glyph names
+            liga_glyphs = tuple(map(fontforge.nameFromUnicode, u_ids))
+            # Add the new ligature to the glyph
+            glyph.addPosSub('liga', liga_glyphs)
+
+            if VS16_INT in u_ids:
+                # Create a list of IDs without the emoji variation selector.
+                u_ids = [id for id in u_ids if id != VS16_INT]
+                liga_glyphs = tuple(map(fontforge.nameFromUnicode, u_ids))
+                glyph.addPosSub('liga', liga_glyphs)
 
         else:
+            # Normal single character glyph
+            # Example: 1f914.svg
             glyph = font.createChar(codepoint)
 
         glyph.importOutlines(filepath)
+        # Set the width of the glyph, assuming everything is the same for now.
         glyph.width = 1000
 
     return font
-
-
-def get_liga_tuple(filename):
-    # TODO: Support SVGs named by Glyph name
-    liga = []
-    for codepoint_str in filename.split("-"):
-        codepoint = int(codepoint_str, 16)
-
-        liga.append(fontforge.nameFromUnicode(codepoint))
-
-    return tuple(liga)
