@@ -5,16 +5,19 @@ Utility functions using FontForge
 
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
+import logging
 
 import fontforge
 
 from . import util
 from .unicode import ZWJ_INT, VS16_INT, ZWJ_SEQUENCES
 
+logger = logging.getLogger(__name__)
+
 
 def create_font():
     """
-
+    Create font with some default options
     """
 
     font = fontforge.font()
@@ -26,6 +29,7 @@ def create_font():
     font.fullname = 'MyFont'
     font.em = 1000
 
+    # TODO: Make ligatures optional
     # Forcing strings to stop TypeError: Bad type for argument due to
     # unicode_literals
     liga = str('liga')
@@ -63,6 +67,7 @@ def add_glyphs(font, svg_filepaths):
 
             # Create a gylph without a defined code point
             glyph = font.createChar(-1, filename)
+            logger.debug("Creating ligature glyph %s", filename)
 
             # Creates a list of Unicode IDs from a string of hyphen separated
             # Unicode IDs.
@@ -83,17 +88,20 @@ def add_glyphs(font, svg_filepaths):
             liga_glyphs = tuple(map(fontforge.nameFromUnicode, u_ids))
             # Add the new ligature to the glyph
             glyph.addPosSub('liga', liga_glyphs)
+            logger.debug("Adding substitution %s", liga_glyphs)
 
             if VS16_INT in u_ids:
                 # Create a list of IDs without the emoji variation selector.
                 u_ids = [id for id in u_ids if id != VS16_INT]
                 liga_glyphs = tuple(map(fontforge.nameFromUnicode, u_ids))
                 glyph.addPosSub('liga', liga_glyphs)
+                logger.debug("Adding substitution %s", liga_glyphs)
 
         else:
             # Normal single character glyph
             # Example: 1f914.svg
             glyph = font.createChar(codepoint)
+            logger.debug("Creating glyph at 0x%x for %s", codepoint, filepath)
 
         glyph.importOutlines(filepath)
         # Set the width of the glyph, assuming everything is the same for now.
