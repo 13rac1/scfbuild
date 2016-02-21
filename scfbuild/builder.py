@@ -1,9 +1,24 @@
 # -*- coding: utf-8 -*-
 
+#    SMFBuild - SVGinOT Multicolor Font Builder
+#    Copyright (C) 2016 Brad Erickson
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
-import glob
 import logging
 import os
 import sys
@@ -36,14 +51,15 @@ class Builder(object):
         self.glyph_svg_dir = glyph_svg_dir
         self.output_file = output_file
         self.options = options
+        self.uids_for_glyph_names = None
 
     def run(self):
-
+        # TODO: Remove FontForge dependency?
         logger.info("Creating a new font")
         ff_font = fforge.create_font()
 
         # Find and add regular glyphs
-        svg_filepaths = self.get_svg_filepaths(self.glyph_svg_dir)
+        svg_filepaths = util.get_svg_filepaths(self.glyph_svg_dir)
         logger.info("Adding glyphs and ligatures")
         fforge.add_glyphs(ff_font, svg_filepaths)
 
@@ -57,8 +73,9 @@ class Builder(object):
         ff_font.generate(tmp_file)
         del ff_font
 
-        logger.info("Adding SVGinOT SVG files")
+        logger.info("Reading intermediate font file")
         font = TTFont(tmp_file)
+        logger.info("Adding SVGinOT SVG files")
         self.add_color_svg(font)
         logger.info("Saving output file: %s", self.output_file)
         font.save(self.output_file)
@@ -72,19 +89,18 @@ class Builder(object):
         return 0
 
     def add_color_svg(self, font):
-        # Get the name
-        codepoint_names = self.get_codepoint_names(font)
-        svg_files = self.get_svg_filepaths(self.options.color_svg_dir)
+        svg_files = util.get_svg_filepaths(self.options.color_svg_dir)
         svg_list = []
 
         for filepath in svg_files:
-            glyph_id = self.get_glyph_id(font, codepoint_names, filepath)
+            glyph_id = self.get_glyph_id(font, filepath)
 
-            data = self.read_file(filepath)
-            data = self.add_glyph_id(data, glyph_id)
+            data = util.read_file(filepath)
+            data = util.add_svg_glyph_id(data, glyph_id)
             if self.options.transform:
-                data = self.add_transform(data, self.options.transform)
+                data = util.add_svg_transform(data, self.options.transform)
 
+            logger.debug("Glyph ID: %d Adding SVG: %s", glyph_id, filepath)
             svg_list.append([data, glyph_id, glyph_id])
 
         svg_table = table_S_V_G_()
@@ -93,7 +109,36 @@ class Builder(object):
         svg_table.colorPalettes = None
         font['SVG '] = svg_table
 
-    def get_codepoint_names(self, font):
+    def get_glyph_id(self, font, filepath):
+        """
+        Find a Glyph ID for the filename in filepath
+        """
+        if self.uids_for_glyph_names is None:
+            self.uids_for_glyph_names = self.get_uids_for_glyph_names(font)
+
+        (codepoint, filename) = util.codepoint_from_filepath(filepath)
+
+        # Check for a regular glyph first
+        try:
+            glyph_name = self.uids_for_glyph_names[codepoint]
+        except KeyError:
+            # If that doesn't work check for a Ligature Glyph
+            glyph_id = font.getGlyphID(filename)
+
+            if glyph_id is -1:
+                logger.warning("No Glyph ID found for: %s (Note: A regular "
+                               "glyph is required for each color glyph)", filepath)
+
+            logger.debug("Found Ligature Glyph: %s", filename)
+            return glyph_id
+
+        logger.debug("Found regular Glyph: %s", glyph_name)
+        return font.getGlyphID(glyph_name)
+
+    def get_uids_for_glyph_names(self, font):
+        """
+        Get a dict glyph names in the font indexed by unicode IDs
+        """
         codepoints = {}
         for subtable in font['cmap'].tables:
             if subtable.isUnicode():
@@ -102,43 +147,6 @@ class Builder(object):
                     codepoints[codepoint] = name
         if len(codepoints) is 0:
             raise NoCodePointsException(
-                'No Unicode Code Points found in font.')
+                'No Unicode IDs/CodePoints found in font.')
 
         return codepoints
-
-    def get_glyph_id(self, font, codepoint_names, filepath):
-        (codepoint, filename) = util.codepoint_from_filepath(filepath)
-
-        try:
-            glyph_name = codepoint_names[codepoint]
-        except KeyError:
-            glyph_id = font.getGlyphID(filename)
-
-            if glyph_id is -1:
-                print("WARNING: No Unicode Code Point found for: {}".format(
-                    filename), file=sys.stderr)
-            return glyph_id
-
-        return font.getGlyphID(glyph_name)
-
-    def get_svg_filepaths(self, svg_dir):
-        return [filename for filename in glob.glob(os.path.join(svg_dir, '*.svg'))]
-
-    def read_file(self, file_path):
-        f = open(file_path, "rt")
-        data = f.read()
-        f.close()
-        return data
-
-    def add_glyph_id(self, svg, id):
-        # TODO: Don't assume the glyph id is missing.
-        old = '<svg '
-        new = '<svg id="glyph{}" '.format(id)
-
-        return svg.replace(old, new)
-
-    def add_transform(self, svg, transform):
-        old = '<svg '
-        new = '<svg transform="{}" '.format(transform)
-
-        return svg.replace(old, new)
