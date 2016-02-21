@@ -46,12 +46,14 @@ def main():
     parser.add_option("--transform", dest="transform",
                       help="add a transform to the <svg> tag of each color SVG. \
                       Example \"translate(0 -800) scale(1.2)\"")
+    parser.add_option("-v", "--verbose", dest="verbose", action="store_true",
+                      default=False, help="print detailed debug information")
 
     # TODO: Options
     # -i --input
     # -t --type TTF/WOFF
     # --remove-unused
-    # -v --verbose
+    #
     # -q --quiet
     # --version
     # --font-version

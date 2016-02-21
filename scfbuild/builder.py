@@ -53,6 +53,9 @@ class Builder(object):
         self.options = options
         self.uids_for_glyph_names = None
 
+        if options.verbose:
+            logging.getLogger().setLevel(logging.DEBUG)
+
     def run(self):
         # TODO: Remove FontForge dependency?
         logger.info("Creating a new font")
