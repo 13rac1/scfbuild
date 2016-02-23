@@ -32,6 +32,8 @@ from fontTools.ttLib.tables.S_V_G_ import table_S_V_G_
 from . import fforge
 from . import util
 
+__version__ = "1.0.0"
+
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
@@ -47,22 +49,22 @@ class NoCodePointsException(Exception):
 
 class Builder(object):
 
-    def __init__(self, glyph_svg_dir, output_file, options=None):
-        self.glyph_svg_dir = glyph_svg_dir
+    def __init__(self, output_file, args=None):
         self.output_file = output_file
-        self.options = options
+        self.args = args
         self.uids_for_glyph_names = None
 
-        if options.verbose:
+        if self.args.verbose:
             logging.getLogger().setLevel(logging.DEBUG)
 
     def run(self):
         # TODO: Remove FontForge dependency?
         logger.info("Creating a new font")
-        ff_font = fforge.create_font()
+        ff_font = fforge.create_font(self.args)
 
         # Find and add regular glyphs
-        svg_filepaths = util.get_svg_filepaths(self.glyph_svg_dir)
+        svg_filepaths = util.get_svg_filepaths(self.args.glyph_svg_dir)
+        # TODO: Validate regular SVGs
         logger.info("Adding glyphs and ligatures")
         fforge.add_glyphs(ff_font, svg_filepaths)
 
@@ -79,6 +81,7 @@ class Builder(object):
         logger.info("Reading intermediate font file")
         font = TTFont(tmp_file)
         logger.info("Adding SVGinOT SVG files")
+        # TODO: Validate color SVGs
         self.add_color_svg(font)
         logger.info("Saving output file: %s", self.output_file)
         font.save(self.output_file)
@@ -92,7 +95,7 @@ class Builder(object):
         return 0
 
     def add_color_svg(self, font):
-        svg_files = util.get_svg_filepaths(self.options.color_svg_dir)
+        svg_files = util.get_svg_filepaths(self.args.color_svg_dir)
         svg_list = []
 
         for filepath in svg_files:
@@ -100,8 +103,8 @@ class Builder(object):
 
             data = util.read_file(filepath)
             data = util.add_svg_glyph_id(data, glyph_id)
-            if self.options.transform:
-                data = util.add_svg_transform(data, self.options.transform)
+            if self.args.transform:
+                data = util.add_svg_transform(data, self.args.transform)
 
             logger.debug("Glyph ID: %d Adding SVG: %s", glyph_id, filepath)
             svg_list.append([data, glyph_id, glyph_id])

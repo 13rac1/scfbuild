@@ -15,19 +15,24 @@ from .unicode import ZWJ_INT, VS16_INT, ZWJ_SEQUENCES
 logger = logging.getLogger(__name__)
 
 
-def create_font():
+def create_font(args=None):
     """
     Create font with some default options
     """
 
     font = fontforge.font()
+
     font.encoding = 'UnicodeFull'
-    font.version = '1.0'
-    font.weight = 'Regular'
-    font.fontname = 'MyFont'
-    font.familyname = 'MyFont'
-    font.fullname = 'MyFont'
-    font.em = 1000
+
+    font.version = args.version
+    font.weight = args.weight
+    font.familyname = args.familyname
+
+    font.fullname = args.familyname + args.weight
+    font.copyright = ''
+    font.comment = ''
+
+    font.em = 2048
 
     # TODO: Make ligatures optional
     # Forcing strings to stop TypeError: Bad type for argument due to
@@ -105,6 +110,6 @@ def add_glyphs(font, svg_filepaths):
 
         glyph.importOutlines(filepath)
         # Set the width of the glyph, assuming everything is the same for now.
-        glyph.width = 1000
+        glyph.width = 2048
 
     return font

@@ -45,9 +45,6 @@ def main():
                         help="family name for the font. default: Untitled")
     parser.add_argument("--weight", dest="weight", default="Regular",
                         help="weight/syle for the font. default: Regular")
-    parser.add_argument("--fullname", dest="fullname",
-                        help="full name of the font. default: Family "
-                        "Name + Weight(if not 'Regular')")
     parser.add_argument("--font-version", dest="version", default="1.0",
                         help="version number for the font. default: 1.0")
 
@@ -63,14 +60,14 @@ def main():
     args = parser.parse_args()
 
     if not args.glyph_svg_dir:
-        parser.error("--glyph-dir is required.")
+        parser.error("--glyph-dir is required. (currently)")
         return 1
     if not args.color_svg_dir:
-        parser.error("--color-dir is required.")
+        parser.error("--color-dir is required. (currently)")
         return 1
-    # TODO: Better Validation
+    # TODO: Better validation
 
-    builder = Builder(args.glyph_svg_dir, args.output, args)
+    builder = Builder(args.output, args)
     return builder.run()
 
 if __name__ == '__main__':
