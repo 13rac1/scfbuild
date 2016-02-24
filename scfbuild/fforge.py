@@ -15,7 +15,7 @@ from .unicode import ZWJ_INT, VS16_INT, ZWJ_SEQUENCES
 logger = logging.getLogger(__name__)
 
 
-def create_font(args=None):
+def create_font(conf=None):
     """
     Create font with some default options
     """
@@ -24,13 +24,16 @@ def create_font(args=None):
 
     font.encoding = 'UnicodeFull'
 
-    font.version = args.version
-    font.weight = args.weight
-    font.familyname = args.familyname
+    # FontForge doesn't support all font fields, so only the minimum fields
+    # are added here.
+    font.version = conf['table_name']['version']
+    font.weight = conf['table_name']['weight']
+    font.familyname = conf['table_name']['family']
+    font.fontname = font.fullname = conf['table_name']['family'] + \
+        conf['table_name']['weight']
 
-    font.fullname = args.familyname + args.weight
-    font.copyright = ''
-    font.comment = ''
+    if 'copyright' in conf['table_name']:
+        font.copyright = conf['table_name']['copyright']
 
     font.em = 2048
 
@@ -46,7 +49,7 @@ def create_font(args=None):
     font.addLookupSubtable('liga', 'liga')
 
     # Add required font characters
-    glyph = font.createChar(0x0000, 'NULL')
+    glyph = font.createChar(0x0000)
     glyph.width = 0
     glyph = font.createChar(0x000d, 'CR')
     glyph.width = 250

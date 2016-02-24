@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#    SMFBuild - SVGinOT Multicolor Font Builder
+#    SCFBuild - SVGinOT Color Font Builder
 #    Copyright (C) 2016 Brad Erickson
 #
 #    This program is free software: you can redistribute it and/or modify
@@ -49,21 +49,20 @@ class NoCodePointsException(Exception):
 
 class Builder(object):
 
-    def __init__(self, output_file, args=None):
-        self.output_file = output_file
-        self.args = args
+    def __init__(self, conf=None):
+        self.conf = conf
         self.uids_for_glyph_names = None
 
-        if self.args.verbose:
+        if self.conf['verbose']:
             logging.getLogger().setLevel(logging.DEBUG)
 
     def run(self):
         # TODO: Remove FontForge dependency?
         logger.info("Creating a new font")
-        ff_font = fforge.create_font(self.args)
+        ff_font = fforge.create_font(self.conf)
 
         # Find and add regular glyphs
-        svg_filepaths = util.get_svg_filepaths(self.args.glyph_svg_dir)
+        svg_filepaths = util.get_svg_filepaths(self.conf['glyph_svg_dir'])
         # TODO: Validate regular SVGs
         logger.info("Adding glyphs and ligatures")
         fforge.add_glyphs(ff_font, svg_filepaths)
@@ -83,8 +82,8 @@ class Builder(object):
         logger.info("Adding SVGinOT SVG files")
         # TODO: Validate color SVGs
         self.add_color_svg(font)
-        logger.info("Saving output file: %s", self.output_file)
-        font.save(self.output_file)
+        logger.info("Saving output file: %s", self.conf['output_file'])
+        font.save(self.conf['output_file'])
 
         # Cleaning Up
         os.remove(tmp_file)
@@ -95,7 +94,7 @@ class Builder(object):
         return 0
 
     def add_color_svg(self, font):
-        svg_files = util.get_svg_filepaths(self.args.color_svg_dir)
+        svg_files = util.get_svg_filepaths(self.conf['color_svg_dir'])
         svg_list = []
 
         for filepath in svg_files:
@@ -103,8 +102,9 @@ class Builder(object):
 
             data = util.read_file(filepath)
             data = util.add_svg_glyph_id(data, glyph_id)
-            if self.args.transform:
-                data = util.add_svg_transform(data, self.args.transform)
+            if self.conf['color_svg_transform']:
+                data = util.add_svg_transform(
+                    data, self.conf['color_svg_transform'])
 
             logger.debug("Glyph ID: %d Adding SVG: %s", glyph_id, filepath)
             svg_list.append([data, glyph_id, glyph_id])
