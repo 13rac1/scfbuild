@@ -10,6 +10,7 @@ import logging
 import os
 import sys
 import tempfile
+import time
 from distutils.version import StrictVersion
 
 import fontTools
@@ -155,7 +156,10 @@ class Builder(object):
         # Set the values that will always exist.
         self.add_name_records(tn['family'], NR.FAMILY)
         self.add_name_records(tn['subfamily'], NR.SUBFAMILY)
-        self.add_name_records(tn['version'], NR.VERSION)
+
+        version = "{} {}".format(tn['version'], time.strftime('%Y%m%d'))
+        self.add_name_records(version, NR.VERSION)
+
         fullname = "{} {}".format(tn['family'], tn['subfamily'])
         self.add_name_records(fullname, NR.FULL_NAME)
 
