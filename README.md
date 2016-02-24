@@ -83,8 +83,7 @@ optional arguments:
 
 ## Other Tools
 `scfbuild` softens the learning curve for font creation, but cannot replace more
-advanced tools. Here are some starting points if you need more features, but
-none of them support SVGinOT at this time:
+advanced tools. Here are some starting points if you need more features:
 
 * http://fontforge.github.io/en-US/
 * https://github.com/adobe-type-tools/afdko
@@ -92,20 +91,5 @@ none of them support SVGinOT at this time:
 
 ## License
 
-```
-SCFBuild - SVGinOT Color Font Builder
-Copyright (C) 2016 Brad Erickson
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-```
+SCFBuild is released under the GNU General Public License v3.
+See LICENSE.txt in the project root directory.

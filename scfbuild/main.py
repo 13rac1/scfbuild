@@ -1,25 +1,16 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 
-#    SCFBuild - SVGinOT Color Font Builder
-#    Copyright (C) 2016 Brad Erickson
-#
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
-#
-#    You should have received a copy of the GNU General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# SCFBuild is released under the GNU General Public License v3.
+# See LICENSE.txt in the project root directory.
 
-'''\
-SCFBuild - SVGinOT Color Font Builder
-'''
+"""\
+SCFBuild - SVGinOT Color Font Builder {}
+Copyright (C) 2016 Brad Erickson
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+"""
 
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
@@ -27,11 +18,12 @@ from __future__ import (absolute_import, division, print_function,
 import argparse
 import yaml
 
+from . import __version__
 from .builder import Builder
 
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(description=__doc__.format(__version__))
 
     parser.add_argument('-o', '--output',
                         dest='output',
@@ -60,7 +52,7 @@ def main():
                         help='weight/style for the font. default: ' + default_subfamily)
     default_version = '1.0'
     parser.add_argument('--font-version',
-                        dest='version',
+                        dest='font_version',
                         default=default_version,
                         help='version number for the font. default: ' + default_version)
     parser.add_argument('-c', '--yaml-conf',
@@ -72,14 +64,22 @@ def main():
                         action='store_true',
                         default=False,
                         help='print detailed debug information')
+    parser.add_argument('-V', '--version',
+                        dest='version',
+                        action='store_true',
+                        default=False,
+                        help='print version information')
 
     # TODO: Options
     # -i --input - Input file instead of making a new one.
     # -t --type TTF/WOFF
     # --remove-unused
-    # --version
 
     args = parser.parse_args()
+
+    if args.version:
+        print(__doc__.format(__version__))
+        return 0
 
     # Load the YAML config if it is available
     if args.yaml_conf:
@@ -109,9 +109,9 @@ def main():
     if 'family' not in conf['table_name'] or args.family is not default_family:
         conf['table_name']['family'] = args.family
     if 'subfamily' not in conf['table_name'] or args.subfamily is not default_subfamily:
-        conf['table_name']['weight'] = args.weight
-    if 'version' not in conf['table_name'] or args.version is not default_version:
-        conf['table_name']['version'] = args.version
+        conf['table_name']['subfamily'] = args.subfamily
+    if 'version' not in conf['table_name'] or args.font_version is not default_version:
+        conf['table_name']['version'] = args.font_version
 
     if 'output_file' not in conf:
         parser.error('--output is required.')

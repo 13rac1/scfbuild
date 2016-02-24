@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# SCFBuild is released under the GNU General Public License v3.
+# See LICENSE.txt in the project root directory.
 
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)

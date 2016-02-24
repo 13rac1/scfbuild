@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# SCFBuild is released under the GNU General Public License v3.
+# See LICENSE.txt in the project root directory.
 """
 Constants for the Name Records
 

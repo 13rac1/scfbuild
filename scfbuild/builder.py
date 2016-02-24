@@ -1,20 +1,7 @@
 # -*- coding: utf-8 -*-
 
-#    SCFBuild - SVGinOT Color Font Builder
-#    Copyright (C) 2016 Brad Erickson
-#
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
-#
-#    You should have received a copy of the GNU General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# SCFBuild is released under the GNU General Public License v3.
+# See LICENSE.txt in the project root directory.
 
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
@@ -78,13 +65,13 @@ class Builder(object):
         del ff_font
 
         logger.info("Reading intermediate font file")
-        font = TTFont(tmp_file)
+        self.font = TTFont(tmp_file)
         logger.info("Adding SVGinOT SVG files")
         # TODO: Validate color SVGs
-        self.add_color_svg(font)
-        self.add_name_table(font)
+        self.add_color_svg()
+        self.add_name_table()
         logger.info("Saving output file: %s", self.conf['output_file'])
-        font.save(self.conf['output_file'])
+        self.font.save(self.conf['output_file'])
 
         # Cleaning Up
         os.remove(tmp_file)
@@ -94,12 +81,12 @@ class Builder(object):
         # 0 for success
         return 0
 
-    def add_color_svg(self, font):
+    def add_color_svg(self):
         svg_files = util.get_svg_filepaths(self.conf['color_svg_dir'])
         svg_list = []
 
         for filepath in svg_files:
-            glyph_id = self.get_glyph_id(font, filepath)
+            glyph_id = self.get_glyph_id(filepath)
 
             data = util.read_file(filepath)
             data = util.add_svg_glyph_id(data, glyph_id)
@@ -114,14 +101,14 @@ class Builder(object):
         # The SVG table must be sorted by glyph_id
         svg_table.docList = sorted(svg_list, key=lambda table: table[1])
         svg_table.colorPalettes = None
-        font['SVG '] = svg_table
+        self.font['SVG '] = svg_table
 
-    def get_glyph_id(self, font, filepath):
+    def get_glyph_id(self, filepath):
         """
         Find a Glyph ID for the filename in filepath
         """
         if self.uids_for_glyph_names is None:
-            self.uids_for_glyph_names = self.get_uids_for_glyph_names(font)
+            self.uids_for_glyph_names = self.get_uids_for_glyph_names()
 
         (codepoint, filename) = util.codepoint_from_filepath(filepath)
 
@@ -130,7 +117,7 @@ class Builder(object):
             glyph_name = self.uids_for_glyph_names[codepoint]
         except KeyError:
             # If that doesn't work check for a Ligature Glyph
-            glyph_id = font.getGlyphID(filename)
+            glyph_id = self.font.getGlyphID(filename)
 
             if glyph_id is -1:
                 logger.warning("No Glyph ID found for: %s (Note: A regular "
@@ -140,14 +127,14 @@ class Builder(object):
             return glyph_id
 
         logger.debug("Found regular Glyph: %s", glyph_name)
-        return font.getGlyphID(glyph_name)
+        return self.font.getGlyphID(glyph_name)
 
-    def get_uids_for_glyph_names(self, font):
+    def get_uids_for_glyph_names(self):
         """
         Get a dict glyph names in the font indexed by unicode IDs
         """
         codepoints = {}
-        for subtable in font['cmap'].tables:
+        for subtable in self.font['cmap'].tables:
             if subtable.isUnicode():
                 for codepoint, name in subtable.cmap.items():
                     # NOTE: May overwrite previous values
@@ -158,7 +145,7 @@ class Builder(object):
 
         return codepoints
 
-    def add_name_table(self, font):
+    def add_name_table(self):
         # FontForge doesn't support all font fields, so we use FontTools.
         self.name_table = table__n_a_m_e()
         self.name_table.names = []
@@ -169,7 +156,7 @@ class Builder(object):
         self.add_name_records(tn['family'], NR.FAMILY)
         self.add_name_records(tn['subfamily'], NR.SUBFAMILY)
         self.add_name_records(tn['version'], NR.VERSION)
-        fullname = tn['family'] + tn['subfamily']
+        fullname = "{} {}".format(tn['family'], tn['subfamily'])
         self.add_name_records(fullname, NR.FULL_NAME)
 
         # Set the values that don't always exist
@@ -188,7 +175,7 @@ class Builder(object):
             if key in tn:
                 self.add_name_records(tn[key], name_id)
 
-        font['name'] = self.name_table
+        self.font['name'] = self.name_table
 
     def add_name_records(self, text, name_id):
         # <namerecord nameID="0" platformID="0" platEncID="0" langID="0x0">
