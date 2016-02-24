@@ -24,17 +24,6 @@ def create_font(conf=None):
 
     font.encoding = 'UnicodeFull'
 
-    # FontForge doesn't support all font fields, so only the minimum fields
-    # are added here.
-    font.version = conf['table_name']['version']
-    font.weight = conf['table_name']['weight']
-    font.familyname = conf['table_name']['family']
-    font.fontname = font.fullname = conf['table_name']['family'] + \
-        conf['table_name']['weight']
-
-    if 'copyright' in conf['table_name']:
-        font.copyright = conf['table_name']['copyright']
-
     font.em = 2048
 
     # TODO: Make ligatures optional

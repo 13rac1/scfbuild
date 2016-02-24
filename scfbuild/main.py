@@ -53,11 +53,11 @@ def main():
                         dest='family',
                         default=default_family,
                         help='family name for the font. default: ' + default_family)
-    default_weight = 'Regular'
-    parser.add_argument('--font-weight',
-                        dest='weight',
-                        default=default_weight,
-                        help='weight/syle for the font. default: ' + default_weight)
+    default_subfamily = 'Regular'
+    parser.add_argument('--font-subfamily',
+                        dest='subfamily',
+                        default=default_subfamily,
+                        help='weight/style for the font. default: ' + default_subfamily)
     default_version = '1.0'
     parser.add_argument('--font-version',
                         dest='version',
@@ -105,10 +105,10 @@ def main():
     if args.verbose:
         conf['verbose'] = True
 
-    # Be sure family name, weight, and version are set to something.
+    # Be sure family name, subfamily, and version are set to something.
     if 'family' not in conf['table_name'] or args.family is not default_family:
         conf['table_name']['family'] = args.family
-    if 'weight' not in conf['table_name'] or args.weight is not default_weight:
+    if 'subfamily' not in conf['table_name'] or args.subfamily is not default_subfamily:
         conf['table_name']['weight'] = args.weight
     if 'version' not in conf['table_name'] or args.version is not default_version:
         conf['table_name']['version'] = args.version
