@@ -44,36 +44,36 @@ Required Python libraries:
 Run: `bin/scfbuild`
 
 ```sh
-$ bin/scfbuild -h
-usage: scfbuild [-h] [-g DIR] [-c DIR] [--transform TRANSFORM]
-                [--familyname FAMILYNAME] [--weight WEIGHT]
-                [--fullname FULLNAME] [--font-version VERSION] [-v]
-                output
+$ bin/scfbuild --help
+usage: scfbuild [-h] [-o OUTPUT] [-g DIR] [-s DIR] [--transform TRANSFORM]
+                [--font-family FAMILY] [--font-subfamily SUBFAMILY]
+                [--font-version FONT_VERSION] [-c YAML_CONF] [-v] [-V]
 
-SCFBuild - SVGinOT Color Font Builder
-
-positional arguments:
-  output                output font file
+SCFBuild - SVGinOT Color Font Builder 1.0.0
 
 optional arguments:
   -h, --help            show this help message and exit
-  -g DIR, --glyph-dir DIR
+  -o OUTPUT, --output OUTPUT
+                        output font file
+  -g DIR, --glyph-svg-dir DIR
                         directory of regular no-color SVG glyphs to add to the
                         font
-  -c DIR, --color-dir DIR
+  -s DIR, --color-svg-dir DIR
                         directory of SVGinOT color SVG glyphs to add to the
                         font.
   --transform TRANSFORM
                         add a transform to the <svg> tag of each color SVG.
-                        Example "translate(0 -800) scale(1.2)"
-  --familyname FAMILYNAME
-                        family name for the font. default: Untitled
-  --weight WEIGHT       weight/syle for the font. default: Regular
-  --fullname FULLNAME   full name of the font. default: Family Name +
-                        Weight(if not 'Regular')
-  --font-version VERSION
+                        Example "translate(0 -1638) scale(2.048)"
+  --font-family FAMILY  family name for the font. default: Untitled
+  --font-subfamily SUBFAMILY
+                        weight/style for the font. default: Regular
+  --font-version FONT_VERSION
                         version number for the font. default: 1.0
+  -c YAML_CONF, --yaml-conf YAML_CONF
+                        yaml build configuration, overridden by command line
+                        options.
   -v, --verbose         print detailed debug information
+  -V, --version         print version information
 ```
 
 ## Examples
