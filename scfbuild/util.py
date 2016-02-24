@@ -32,10 +32,10 @@ def read_file(file_path):
     return data
 
 
-def add_svg_glyph_id(svg, id):
+def add_svg_glyph_id(svg, glyph_id):
     # TODO: Don't assume the glyph id is missing.
     old = '<svg '
-    new = '<svg id="glyph{}" '.format(id)
+    new = '<svg id="glyph{}" '.format(glyph_id)
 
     return svg.replace(old, new)
 

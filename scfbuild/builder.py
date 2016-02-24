@@ -157,16 +157,25 @@ class Builder(object):
         self.add_name_records(tn['family'], NR.FAMILY)
         self.add_name_records(tn['subfamily'], NR.SUBFAMILY)
 
-        version = "{} {}".format(tn['version'], time.strftime('%Y%m%d'))
-        self.add_name_records(version, NR.VERSION)
-
         fullname = "{} {}".format(tn['family'], tn['subfamily'])
         self.add_name_records(fullname, NR.FULL_NAME)
+
+        # Add the build date to the version
+        now = time.strftime('%Y%m%d')
+        version = "{} {}".format(tn['version'], now)
+        self.add_name_records(version, NR.VERSION)
+
+        # Add the build date to the unique id
+        unique_id = ''
+        if 'unique_id' in tn:
+            unique_id = "{} {}".format(tn['unique_id'], now)
+        else:
+            unique_id = now
+        self.add_name_records(unique_id, NR.UNIQUE_ID)
 
         # Set the values that don't always exist
         for key, name_id in (
                 ('copyright', NR.COPYRIGHT),
-                ('unique_id', NR.UNIQUE_ID),
                 ('postscript_name', NR.PS_NAME),
                 ('trademark', NR.TRADEMARK),
                 ('manufacturer', NR.MANUFACTURER),
