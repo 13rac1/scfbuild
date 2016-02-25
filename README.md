@@ -78,8 +78,10 @@ optional arguments:
 
 ## Examples
 
-* EmojiOne Color SVGinOT - SCFBuild was written to create this font.
+* [EmojiOne Color][7] - SCFBuild was written to create this SVGinOT font.
 * Simpler examples coming soon!
+
+[7]: https://github.com/eosrei/emojione-color-font
 
 ## Other Tools
 `scfbuild` softens the learning curve for font creation, but cannot replace more
