@@ -40,10 +40,8 @@ def create_font(conf=None):
     font.addLookupSubtable('liga', 'liga')
 
     # Add required font characters
-    glyph = font.createChar(0x0000)
+    glyph = font.createChar(0x0, '.null')
     glyph.width = 0
-    glyph = font.createChar(0x000d, 'CR')
-    glyph.width = 250
     glyph = font.createChar(ZWJ_INT)
     glyph.width = 0
     glyph = font.createChar(VS16_INT)
