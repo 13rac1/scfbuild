@@ -103,5 +103,8 @@ def add_glyphs(font, svg_filepaths):
         glyph.importOutlines(filepath)
         # Set the width of the glyph, assuming everything is the same for now.
         glyph.width = 2048
+        glyph.removeOverlap()
+        glyph.simplify()
+        glyph.addExtrema()
 
     return font
