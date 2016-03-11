@@ -91,9 +91,11 @@ class Builder(object):
 
             data = util.read_file(filepath)
             data = util.add_svg_glyph_id(data, glyph_id)
-            if self.conf['color_svg_transform']:
+            try:
                 data = util.add_svg_transform(
-                    data, self.conf['color_svg_transform'])
+                    data, self.conf['color_transform'])
+            except KeyError:
+                pass
 
             logger.debug("Glyph ID: %d Adding SVG: %s", glyph_id, filepath)
             svg_list.append([data, glyph_id, glyph_id])
