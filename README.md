@@ -49,7 +49,7 @@ usage: scfbuild [-h] [-o OUTPUT] [-g DIR] [-s DIR] [--transform TRANSFORM]
                 [--font-family FAMILY] [--font-subfamily SUBFAMILY]
                 [--font-version FONT_VERSION] [-c YAML_CONF] [-v] [-V]
 
-SCFBuild - SVGinOT Color Font Builder 1.0.0
+SCFBuild - SVGinOT Color Font Builder 1.0.1
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -78,10 +78,14 @@ optional arguments:
 
 ## Examples
 
-* [EmojiOne Color][7] - SCFBuild was written to create this SVGinOT font.
+* [Emoji One Color][7] - SCFBuild was created to make this color emoji font
+  using Emoji One graphics.
+* [Twitter Color Emoji][8] - Color emoji font using Twitter Emoji for Everyone
+  graphics.
 * Simpler examples coming soon!
 
 [7]: https://github.com/eosrei/emojione-color-font
+[8]: https://github.com/eosrei/twemoji-color-font
 
 ## Other Tools
 `scfbuild` softens the learning curve for font creation, but cannot replace more
