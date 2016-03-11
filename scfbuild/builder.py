@@ -47,13 +47,13 @@ class Builder(object):
     def run(self):
         # TODO: Remove FontForge dependency?
         logger.info("Creating a new font")
-        ff_font = fforge.create_font(self.conf)
+        ff_font = fforge.create_font()
 
         # Find and add regular glyphs
         svg_filepaths = util.get_svg_filepaths(self.conf['glyph_svg_dir'])
         # TODO: Validate regular SVGs
         logger.info("Adding glyphs and ligatures")
-        fforge.add_glyphs(ff_font, svg_filepaths)
+        fforge.add_glyphs(ff_font, svg_filepaths, self.conf)
 
         tmp_dir = tempfile.mkdtemp()
         tmp_file = os.path.join(tmp_dir, "tmp.ttf")

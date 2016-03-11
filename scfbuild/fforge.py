@@ -10,6 +10,7 @@ from __future__ import (absolute_import, division, print_function,
 import logging
 
 import fontforge
+import psMat
 
 from . import util
 from .unicode import ZWJ_INT, VS16_INT, ZWJ_SEQUENCES
@@ -17,7 +18,7 @@ from .unicode import ZWJ_INT, VS16_INT, ZWJ_SEQUENCES
 logger = logging.getLogger(__name__)
 
 
-def create_font(conf=None):
+def create_font():
     """
     Create font with some default options
     """
@@ -50,7 +51,7 @@ def create_font(conf=None):
     return font
 
 
-def add_glyphs(font, svg_filepaths):
+def add_glyphs(font, svg_filepaths, conf):
     """
     Loop through all files and create regular or ligature glyphs for each.
     """
@@ -106,5 +107,16 @@ def add_glyphs(font, svg_filepaths):
         glyph.removeOverlap()
         glyph.simplify()
         glyph.addExtrema()
+
+        try:
+            trans = psMat.translate(
+                conf['glyph_translate_x'],
+                conf['glyph_translate_y'])
+            glyph.transform(trans)
+            logger.debug("Translate glyph (%d, %d)",
+                         conf['glyph_translate_x'],
+                         conf['glyph_translate_y'])
+        except KeyError:
+            pass
 
     return font
