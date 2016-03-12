@@ -20,19 +20,30 @@ Microsoft color font formats are not supported.
 [2]: https://en.wikipedia.org/wiki/Unicode
 [3]: https://en.wikipedia.org/wiki/Typographic_ligature
 
+## Examples
+
+* [Emoji One Color][4] - SCFBuild was created to make this color emoji font
+  using Emoji One graphics.
+* [Twitter Color Emoji][5] - Color emoji font using Twitter Emoji for Everyone
+  graphics.
+* Simpler examples coming soon!
+
+[4]: https://github.com/eosrei/emojione-color-font
+[5]: https://github.com/eosrei/twemoji-color-font
+
 ## What is SVGinOT?
 *SVG in Open Type* is a standard by Adobe and Mozilla for color OpenType
 and Open Font Format fonts. It allows font creators to embed complete SVG files
 within a font enabling full color and even animations. There are more details in
-the [SVGinOT proposal][4] and the [OpenType SVG table specifications][5].
+the [SVGinOT proposal][6] and the [OpenType SVG table specifications][7].
 
 SVGinOT Demos (Firefox only):
 
 * https://www.adobe.com/devnet-apps/type/svgopentype.html
 * https://hacks.mozilla.org/2014/10/svg-colors-in-opentype-fonts/
 
-[4]: https://www.w3.org/2013/10/SVG_in_OpenType/
-[5]: https://www.microsoft.com/typography/otspec/svg.htm
+[6]: https://www.w3.org/2013/10/SVG_in_OpenType/
+[7]: https://www.microsoft.com/typography/otspec/svg.htm
 
 ## Usage - Linux
 
@@ -76,16 +87,6 @@ optional arguments:
   -V, --version         print version information
 ```
 
-## Examples
-
-* [Emoji One Color][7] - SCFBuild was created to make this color emoji font
-  using Emoji One graphics.
-* [Twitter Color Emoji][8] - Color emoji font using Twitter Emoji for Everyone
-  graphics.
-* Simpler examples coming soon!
-
-[7]: https://github.com/eosrei/emojione-color-font
-[8]: https://github.com/eosrei/twemoji-color-font
 
 ## Other Tools
 `scfbuild` softens the learning curve for font creation, but cannot replace more
@@ -98,4 +99,4 @@ advanced tools. Here are some starting points if you need more features:
 ## License
 
 SCFBuild is released under the GNU General Public License v3.
-See LICENSE.txt in the project root directory.
+See [LICENSE.txt](LICENSE.txt) in the project root directory.
