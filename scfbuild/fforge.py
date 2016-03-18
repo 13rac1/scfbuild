@@ -40,9 +40,19 @@ def create_font():
     font.addLookup('liga', 'gsub_ligature', (), feature_script_lang)
     font.addLookupSubtable('liga', 'liga')
 
-    # Add required font characters
-    glyph = font.createChar(0x0, '.null')
+    # Add all recommended font characters
+    # Reference: https://www.microsoft.com/typography/otspec/recom.htm
+    glyph = font.createChar(-1, '.notdef')
     glyph.width = 0
+    # @todo Needs a default notdef glyph
+    glyph = font.createChar(0x0, '.null')
+    glyph.width = 1024
+    glyph = font.createChar(0xD, 'CR')
+    # @todo: Add space width to config yaml
+    glyph.width = 1024
+    glyph = font.createChar(0x20, 'space')
+    # Half-width space
+    glyph.width = 1024
     glyph = font.createChar(ZWJ_INT)
     glyph.width = 0
     glyph = font.createChar(VS16_INT)

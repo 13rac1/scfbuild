@@ -5,7 +5,7 @@
 `scfbuild` creates *SVG in OpenType* color fonts directly from a set of source
 SVG files greatly simplifying the process of creating a custom color font.
 
-Regular color and standard character [glyph][1] are named by [Unicode][2] code
+Regular color and standard character [glyphs][1] are named by [Unicode][2] code
 point (e.g. `1f60e.svg`). [Ligatures][3] are named by code points separated
 by a hyphen `-` (e.g.`1f441-1f5e8.svg`). Note: Color glyphs cannot exist alone,
 they must replace existing standard glyphs.

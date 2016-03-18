@@ -70,6 +70,7 @@ def main():
     # -i --input - Input file instead of making a new one.
     # -t --type TTF/WOFF
     # --remove-unused
+    # --generate-conf
 
     args = parser.parse_args()
 
