@@ -60,7 +60,7 @@ usage: scfbuild [-h] [-o OUTPUT] [-g DIR] [-s DIR] [--transform TRANSFORM]
                 [--font-family FAMILY] [--font-subfamily SUBFAMILY]
                 [--font-version FONT_VERSION] [-c YAML_CONF] [-v] [-V]
 
-SCFBuild - SVGinOT Color Font Builder 1.0.1
+SCFBuild - SVGinOT Color Font Builder 1.x.x
 
 optional arguments:
   -h, --help            show this help message and exit
