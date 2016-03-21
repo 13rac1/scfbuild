@@ -17,8 +17,10 @@ from .unicode import ZWJ_INT, VS16_INT, ZWJ_SEQUENCES
 
 logger = logging.getLogger(__name__)
 
+DEFAULT_GLYPH_WIDTH = 512
 
-def create_font():
+
+def create_font(conf):
     """
     Create font with some default options
     """
@@ -44,15 +46,17 @@ def create_font():
     # Reference: https://www.microsoft.com/typography/otspec/recom.htm
     glyph = font.createChar(-1, '.notdef')
     glyph.width = 0
-    # @todo Needs a default notdef glyph
+    # TODO: Needs a default notdef glyph
     glyph = font.createChar(0x0, '.null')
-    glyph.width = 1024
+    glyph.width = DEFAULT_GLYPH_WIDTH
     glyph = font.createChar(0xD, 'CR')
-    # @todo: Add space width to config yaml
-    glyph.width = 1024
+    try:
+        glyph.width = conf['width_space']
+    except KeyError:
+        glyph.width = DEFAULT_GLYPH_WIDTH
+    logger.debug("Space character width: %d", glyph.width)
     glyph = font.createChar(0x20, 'space')
-    # Half-width space
-    glyph.width = 1024
+    glyph.width = DEFAULT_GLYPH_WIDTH
     glyph = font.createChar(ZWJ_INT)
     glyph.width = 0
     glyph = font.createChar(VS16_INT)

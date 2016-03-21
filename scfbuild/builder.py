@@ -29,6 +29,7 @@ logging.basicConfig(level=logging.INFO)
 if StrictVersion('2.5') > StrictVersion(fontTools.version):
     logger.exception("The FontTools module version must be 2.5 or higher.")
     sys.exit(1)
+# todo: Check FontForge version
 
 
 class NoCodePointsException(Exception):
@@ -45,9 +46,8 @@ class Builder(object):
             logging.getLogger().setLevel(logging.DEBUG)
 
     def run(self):
-        # TODO: Remove FontForge dependency?
         logger.info("Creating a new font")
-        ff_font = fforge.create_font()
+        ff_font = fforge.create_font(self.conf)
 
         # Find and add regular glyphs
         svg_filepaths = util.get_svg_filepaths(self.conf['glyph_svg_dir'])
