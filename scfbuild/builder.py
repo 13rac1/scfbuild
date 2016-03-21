@@ -159,7 +159,11 @@ class Builder(object):
         self.add_name_records(tn['family'], NR.FAMILY)
         self.add_name_records(tn['subfamily'], NR.SUBFAMILY)
 
-        fullname = "{} {}".format(tn['family'], tn['subfamily'])
+        fullname = ''
+        if 'full_name' in tn:
+            fullname = tn['full_name']
+        else:
+            fullname = "{} {}".format(tn['family'], tn['subfamily'])
         self.add_name_records(fullname, NR.FULL_NAME)
 
         # Add the build date to the version
