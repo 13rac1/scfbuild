@@ -50,13 +50,13 @@ def create_font(conf):
     glyph = font.createChar(0x0, '.null')
     glyph.width = DEFAULT_GLYPH_WIDTH
     glyph = font.createChar(0xD, 'CR')
+    glyph.width = DEFAULT_GLYPH_WIDTH
+    glyph = font.createChar(0x20, 'space')
     try:
         glyph.width = conf['width_space']
     except KeyError:
         glyph.width = DEFAULT_GLYPH_WIDTH
     logger.debug("Space character width: %d", glyph.width)
-    glyph = font.createChar(0x20, 'space')
-    glyph.width = DEFAULT_GLYPH_WIDTH
     glyph = font.createChar(ZWJ_INT)
     glyph.width = 0
     glyph = font.createChar(VS16_INT)
