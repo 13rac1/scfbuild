@@ -20,7 +20,9 @@ from fontTools.ttLib.tables._n_a_m_e import NameRecord, table__n_a_m_e
 
 from . import fforge
 from . import util
+from .util import FONT_EM
 from .constants import name_record as NR
+from twisted.python import filepath
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -91,11 +93,10 @@ class Builder(object):
 
             data = util.read_file(filepath)
             data = util.add_svg_glyph_id(data, glyph_id)
-            try:
-                data = util.add_svg_transform(
-                    data, self.conf['color_transform'])
-            except KeyError:
-                pass
+
+            svg_transform = self.create_color_transform(filepath)
+            data = util.add_svg_transform(data, svg_transform)
+            logger.debug("Set SVG transform: {}".format(svg_transform))
 
             logger.debug("Glyph ID: %d Adding SVG: %s", glyph_id, filepath)
             svg_list.append([data, glyph_id, glyph_id])
@@ -134,7 +135,7 @@ class Builder(object):
 
     def get_uids_for_glyph_names(self):
         """
-        Get a dict glyph names in the font indexed by unicode IDs
+        Get a dict of glyph names in the font indexed by unicode IDs
         """
         codepoints = {}
         for subtable in self.font['cmap'].tables:
@@ -147,6 +148,32 @@ class Builder(object):
                 'No Unicode IDs/CodePoints found in font.')
 
         return codepoints
+
+    def create_color_transform(self, filepath):
+        """
+        Generate the transform for the color SVG.
+        """
+        svg_transform = ""
+        if 'color_transform' in self.conf:
+            svg_transform = "{} ".format(self.conf['color_transform'])
+
+        # This was complicated to figure out.
+        # The SVGs are rendered as if all glyphs are FONT_EM wide, instead of their true
+        # values. This math accounts for the glyph width reduction by moving the SVGs
+        # to the left by half of the difference between FONT_EM and glyph_width
+        glyph_width = util.get_glyph_width(filepath)
+        translate_x = -(FONT_EM - glyph_width) / 2
+
+        # Account for SVG vs Glyph y-coordinate differences.
+        # 8/10*2048 = 1638 = Default font ascent.
+        translate_y = FONT_EM * -.8
+
+        svg_transform += "translate({} {}) scale({})".format(
+            translate_x,
+            translate_y,
+            util.SVG_TRANSFORM_SCALE)
+
+        return svg_transform
 
     def add_name_table(self):
         # FontForge doesn't support all font fields, so we use FontTools.
