@@ -8,7 +8,7 @@ Utility functions using FontForge
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 import logging
-
+import xml.etree.ElementTree as ET
 import fontforge
 import psMat
 
@@ -17,6 +17,7 @@ from .unicode import ZWJ_INT, VS16_INT, ZWJ_SEQUENCES
 
 logger = logging.getLogger(__name__)
 
+FONT_EM = 2048
 DEFAULT_GLYPH_WIDTH = 512
 
 
@@ -29,7 +30,7 @@ def create_font(conf):
 
     font.encoding = 'UnicodeFull'
 
-    font.em = 2048
+    font.em = FONT_EM
 
     # TODO: Make ligatures optional
     # Forcing strings to stop TypeError: Bad type for argument due to
@@ -63,6 +64,31 @@ def create_font(conf):
     glyph.width = 0
 
     return font
+
+
+def get_dimensions(svg_filepath):
+    """
+    Load and parse the SVG XML. Return the height and width
+    """
+    tree = ET.parse(svg_filepath)
+    root = tree.getroot()
+
+    # Try to get the height/width attribs
+    try:
+        return (float(root.attrib['height']), float(root.attrib['width']))
+    except KeyError:
+        # Try to get the viewBox. Format: 0 0 200 200
+        # Todo: Can fail with key error
+        dims = root.attrib['viewBox'].split(' ')
+        return (float(dims[2]), float(dims[3]))
+
+
+def get_glyph_width(svg_height, svg_width):
+    """
+    Given the height/width of the input SVG, find the glyph width
+    """
+    glyph_ratio = svg_width / svg_height
+    return int(FONT_EM * glyph_ratio)
 
 
 def add_glyphs(font, svg_filepaths, conf):
@@ -116,8 +142,11 @@ def add_glyphs(font, svg_filepaths, conf):
             logger.debug("Creating glyph at 0x%x for %s", codepoint, filepath)
 
         glyph.importOutlines(filepath)
-        # Set the width of the glyph, assuming everything is the same for now.
-        glyph.width = 2048
+
+        height, width = get_dimensions(filepath)
+        logger.debug("Found SVG width/height (%d/%d)", width, height)
+        glyph.width = get_glyph_width(height, width)
+        logger.debug("Set glyph width/height (%d/%d)", glyph.width, FONT_EM)
         glyph.removeOverlap()
         glyph.simplify()
         glyph.addExtrema()
