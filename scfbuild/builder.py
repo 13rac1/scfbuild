@@ -12,6 +12,7 @@ import sys
 import tempfile
 import time
 from distutils.version import StrictVersion
+import xml.etree.ElementTree as ET
 
 import fontTools
 from fontTools.ttLib import TTFont
@@ -22,7 +23,6 @@ from . import fforge
 from . import util
 from .util import FONT_EM
 from .constants import name_record as NR
-from twisted.python import filepath
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -88,11 +88,18 @@ class Builder(object):
         svg_files = util.get_svg_filepaths(self.conf['color_svg_dir'])
         svg_list = []
 
+        # Set default namespace (avoids "ns0:svg")
+        ET.register_namespace("", "http://www.w3.org/2000/svg")
+
         for filepath in svg_files:
             glyph_id = self.get_glyph_id(filepath)
 
-            data = util.read_file(filepath)
-            data = util.add_svg_glyph_id(data, glyph_id)
+            svg_tree = ET.parse(filepath)
+            svg_root = svg_tree.getroot()
+            # Add Glyph ID as SVG root id, required by SVGinOT spec.
+            svg_root.attrib['id'] = "glyph{}".format(glyph_id)
+
+            data = ET.tostring(svg_root, encoding='utf8')
 
             svg_transform = self.create_color_transform(filepath)
             data = util.add_svg_transform(data, svg_transform)
