@@ -7,6 +7,7 @@ from __future__ import (absolute_import, division, print_function,
 
 import glob
 import os
+import re
 import logging
 import xml.etree.ElementTree as ET
 
@@ -67,14 +68,18 @@ def get_dimensions(svg_filepath):
 
     # Try to get the height/width attribs
     try:
-        height = float(root.attrib['height'])
-        width = float(root.attrib['width'])
+        height = root.attrib['height']
+        width = root.attrib['width']
     except KeyError:
         # Try to get the viewBox. Format: 0 0 200 200
         # Todo: Can fail with key error
         dims = root.attrib['viewBox'].split(' ')
-        height = float(dims[2])
-        width = float(dims[3])
+        height = dims[2]
+        width = dims[3]
+
+    # Strip all non-numbers and convert to float
+    height = float(re.sub("[^0-9\.]", "", height))
+    width = float(re.sub("[^0-9\.]", "", width))
 
     logger.debug("Found SVG width/height (%.2f/%.2f)", width, height)
     return (height, width)
