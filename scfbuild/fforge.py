@@ -81,7 +81,7 @@ def add_glyphs(font, svg_filepaths, conf):
 
             # Creates a list of Unicode IDs from a string of hyphen separated
             # Unicode IDs.
-            u_ids = [int(id, 16) for id in filename.split("-")]
+            u_ids = [int(u_id, 16) for u_id in filename.split("-")]
             # Example: (0x1f441, 0x1f5e8)
 
             u_str = ''.join(map(unichr, u_ids))
@@ -102,7 +102,7 @@ def add_glyphs(font, svg_filepaths, conf):
 
             if VS16_INT in u_ids:
                 # Create a list of IDs without the emoji variation selector.
-                u_ids = [id for id in u_ids if id != VS16_INT]
+                u_ids = [u_id for u_id in u_ids if u_id != VS16_INT]
                 liga_glyphs = tuple(map(fontforge.nameFromUnicode, u_ids))
                 glyph.addPosSub('liga', liga_glyphs)
                 logger.debug("Adding substitution %s", liga_glyphs)
