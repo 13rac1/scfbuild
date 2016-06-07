@@ -43,13 +43,6 @@ def read_file(file_path):
     return data
 
 
-def add_svg_transform(svg, transform):
-    old = '<svg '
-    new = '<svg transform="{}" '.format(transform)
-
-    return svg.replace(old, new)
-
-
 def get_dimensions(svg_filepath):
     """
     Load and parse the SVG XML. Return the height and width

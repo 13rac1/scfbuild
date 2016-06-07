@@ -21,7 +21,7 @@ from fontTools.ttLib.tables._n_a_m_e import NameRecord, table__n_a_m_e
 
 from . import fforge
 from . import util
-from .util import FONT_EM
+from .util import FONT_EM, SVG_TRANSFORM_SCALE
 from .constants import name_record as NR
 
 logger = logging.getLogger(__name__)
@@ -97,14 +97,28 @@ class Builder(object):
             svg_tree = ET.parse(filepath)
             svg_root = svg_tree.getroot()
             # Add Glyph ID as SVG root id, required by SVGinOT spec.
-            svg_root.attrib['id'] = "glyph{}".format(glyph_id)
-
-            data = ET.tostring(svg_root, encoding='utf8')
+            svg_root.set('id', "glyph{}".format(glyph_id))
 
             svg_transform = self.create_color_transform(filepath)
-            data = util.add_svg_transform(data, svg_transform)
             logger.debug("Set SVG transform: {}".format(svg_transform))
 
+            svg_transform_attrib = {"transform": svg_transform}
+            # Create a new group tag to apply the transform to
+            new_svg_group = ET.Element('g', svg_transform_attrib)
+            # Copy all SVG root children to the new group
+            for child in svg_root:
+                new_svg_group.append(child)
+
+            # Backup the root attribs, clear the children, and apply attribs
+            svg_root_attrib = svg_root.items()
+            svg_root.clear()
+            for name, value in svg_root_attrib:
+                svg_root.set(name, value)
+
+            # Append the new group.
+            svg_root.append(new_svg_group)
+
+            data = ET.tostring(svg_root, encoding='utf8')
             logger.debug("Glyph ID: %d Adding SVG: %s", glyph_id, filepath)
             svg_list.append([data, glyph_id, glyph_id])
 
@@ -165,20 +179,22 @@ class Builder(object):
             svg_transform = "{} ".format(self.conf['color_transform'])
 
         # This was complicated to figure out.
-        # The SVGs are rendered as if all glyphs are FONT_EM wide, instead of their true
-        # values. This math accounts for the glyph width reduction by moving the SVGs
-        # to the left by half of the difference between FONT_EM and glyph_width
-        glyph_width = util.get_glyph_width(filepath)
-        translate_x = -(FONT_EM - glyph_width) / 2
+        # The SVGs are rendered as if all glyphs are FONT_EM wide scaled to SVG coordinates.
+        # This math accounts for proportional glyph width reduction by moving the SVGs
+        # to the left by half of the difference between scaled FONT_EM aka svg_height
+        # and svg_width.
+        svg_height, svg_width = util.get_dimensions(filepath)
+        translate_x = -(svg_height - svg_width) / 2
 
         # Account for SVG vs Glyph y-coordinate differences.
-        # 8/10*2048 = 1638 = Default font ascent.
-        translate_y = FONT_EM * -.8
+        # Glyph coordinate space: -8/10*2048 = -1638 = Default font ascent.
+        # SVG coordinate space: svg_height * SVG_TRANSFORM_SCALE * -.8
+        translate_y = svg_height * SVG_TRANSFORM_SCALE * -.8
 
         svg_transform += "translate({} {}) scale({})".format(
             translate_x,
             translate_y,
-            util.SVG_TRANSFORM_SCALE)
+            SVG_TRANSFORM_SCALE)
 
         return svg_transform
 
