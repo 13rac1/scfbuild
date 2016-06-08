@@ -22,28 +22,30 @@ Microsoft color font formats are not supported.
 
 ## Examples
 
-* [Emoji One Color][4] - SCFBuild was created to make this color emoji font
-  using Emoji One graphics.
+* [EmojiOne Color][4] - SCFBuild was created to make this color emoji font
+  using EmojiOne graphics.
 * [Twitter Color Emoji][5] - Color emoji font using Twitter Emoji for Everyone
   graphics.
-* Simpler examples coming soon!
+* [Reinebow][6] - A colorful alphanumeric font. [[source][7]]
 
 [4]: https://github.com/eosrei/emojione-color-font
 [5]: https://github.com/eosrei/twemoji-color-font
+[6]: http://xerographer.github.io/reinebow/
+[7]: https://github.com/xerographer/reinebow-color-font
 
 ## What is SVGinOT?
 *SVG in Open Type* is a standard by Adobe and Mozilla for color OpenType
 and Open Font Format fonts. It allows font creators to embed complete SVG files
 within a font enabling full color and even animations. There are more details in
-the [SVGinOT proposal][6] and the [OpenType SVG table specifications][7].
+the [SVGinOT proposal][8] and the [OpenType SVG table specifications][9].
 
 SVGinOT Demos (Firefox only):
 
 * https://www.adobe.com/devnet-apps/type/svgopentype.html
 * https://hacks.mozilla.org/2014/10/svg-colors-in-opentype-fonts/
 
-[6]: https://www.w3.org/2013/10/SVG_in_OpenType/
-[7]: https://www.microsoft.com/typography/otspec/svg.htm
+[8]: https://www.w3.org/2013/10/SVG_in_OpenType/
+[9]: https://www.microsoft.com/typography/otspec/svg.htm
 
 ## Usage - Linux
 
@@ -90,7 +92,8 @@ optional arguments:
 
 ## Other Tools
 `scfbuild` softens the learning curve for font creation, but cannot replace more
-advanced tools. Here are some starting points if you need more features:
+advanced tools. Here are some starting points if you need more features,
+although none support color fonts at this time:
 
 * http://fontforge.github.io/en-US/
 * https://github.com/adobe-type-tools/afdko
