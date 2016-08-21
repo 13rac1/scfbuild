@@ -99,6 +99,24 @@ class Builder(object):
             # Add Glyph ID as SVG root id, required by SVGinOT spec.
             svg_root.set('id', "glyph{}".format(glyph_id))
 
+            # Remove the viewBox/height/width attributes since they are
+            # processed inconsistently by Gecko and Edge renderers.
+            try:
+                del svg_root.attrib['viewBox']
+            except KeyError:
+                pass
+
+            try:
+                del svg_root.attrib['height']
+            except KeyError:
+                pass
+
+            try:
+                del svg_root.attrib['width']
+            except KeyError:
+                pass
+
+            # Add the transform to size the SVG to the FONT_EM
             svg_transform = self.create_color_transform(filepath)
             logger.debug("Set SVG transform: {}".format(svg_transform))
 
@@ -177,24 +195,24 @@ class Builder(object):
         svg_transform = ""
         if 'color_transform' in self.conf:
             svg_transform = "{} ".format(self.conf['color_transform'])
+        svg_height, _ = util.get_dimensions(filepath)
 
-        # This was complicated to figure out.
-        # The SVGs are rendered as if all glyphs are FONT_EM wide scaled to SVG coordinates.
-        # This math accounts for proportional glyph width reduction by moving the SVGs
-        # to the left by half of the difference between scaled FONT_EM aka svg_height
-        # and svg_width.
-        svg_height, svg_width = util.get_dimensions(filepath)
-        translate_x = -(svg_height - svg_width) / 2
+        # Find the scale multiplier based on current height verses intended
+        # height (aka font EM). Whatever the SVG is, it needs to be scaled to
+        # fit within the FONT_EM.
+        scale = FONT_EM / svg_height
 
-        # Account for SVG vs Glyph y-coordinate differences.
-        # Glyph coordinate space: -8/10*2048 = -1638 = Default font ascent.
-        # SVG coordinate space: svg_height * SVG_TRANSFORM_SCALE * -.8
-        translate_y = svg_height * SVG_TRANSFORM_SCALE * -.8
+        # No need to adjust, but called out for clarity.
+        translate_x = 0
+        # SVG(y Down) vs Glyph/TTF(y Up) y-coordinate differences.
+        # Simple answer is -FONT_EM but that does not account for descent.
+        # Y=0 is on the baseline without a descent adjustment.
+        # Default font descent: -2/10*2048 = -409.6
+        translate_y = - (FONT_EM - FONT_EM * .2)
 
-        svg_transform += "translate({} {}) scale({})".format(
-            translate_x,
-            translate_y,
-            SVG_TRANSFORM_SCALE)
+        svg_transform += "translate({},{}) scale({})".format(translate_x,
+                                                             translate_y,
+                                                             scale)
 
         return svg_transform
 
