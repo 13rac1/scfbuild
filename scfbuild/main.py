@@ -99,8 +99,7 @@ def main():
     if args.transform:
         conf['color_svg_transform'] = args.transform
 
-    if args.verbose:
-        conf['verbose'] = True
+    conf['verbose'] = args.verbose
 
     # Be sure family name, subfamily, and version are set to something.
     if 'family' not in conf['table_name'] or args.family is not default_family:
