@@ -136,7 +136,7 @@ class Builder(object):
             # Append the new group.
             svg_root.append(new_svg_group)
 
-            data = ET.tostring(svg_root, encoding='utf8')
+            data = ET.tostring(svg_root, encoding='UTF-8')
             logger.debug("Glyph ID: %d Adding SVG: %s", glyph_id, filepath)
             svg_list.append([data, glyph_id, glyph_id])
 
