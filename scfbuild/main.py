@@ -58,7 +58,6 @@ def main():
     parser.add_argument('-v', '--verbose',
                         dest='verbose',
                         action='store_true',
-                        default=False,
                         help='print detailed debug information')
     parser.add_argument('-V', '--version',
                         dest='version',
@@ -88,6 +87,8 @@ def main():
 
     if 'table_name' not in conf:
         conf['table_name'] = {}
+    if 'verbose' not in conf:
+        conf['verbose'] = False
 
     # Command line options override YAML
     if args.output:
@@ -98,8 +99,8 @@ def main():
         conf['color_svg_dir'] = args.color_svg_dir
     if args.transform:
         conf['color_svg_transform'] = args.transform
-
-    conf['verbose'] = args.verbose
+    if args.verbose:
+        conf['verbose'] = True
 
     # Be sure family name, subfamily, and version are set to something.
     if 'family' not in conf['table_name'] or args.family is not default_family:
