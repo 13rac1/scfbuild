@@ -7,7 +7,7 @@ from __future__ import (absolute_import, division, print_function,
 
 # ZERO WIDTH JOINER (ZWJ)
 ZWJ_INT = 0x200d
-ZMJ = '\u200d'
+ZWJ = '\u200d'
 # VARIATION SELECTOR-16 - Used as emoji variation selector.
 VS16_INT = 0xfe0f
 VS16 = '\ufe0f'
