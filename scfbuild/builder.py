@@ -11,7 +11,7 @@ import os
 import sys
 import tempfile
 import time
-from distutils.version import StrictVersion
+from distutils.version import LooseVersion
 import xml.etree.ElementTree as ET
 
 import fontTools
@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
 # Support for SVG tables was added to fontTools in version 2.5
-if StrictVersion('2.5') > StrictVersion(fontTools.version):
+if LooseVersion('2.5') > LooseVersion(fontTools.version):
     logger.exception("The FontTools module version must be 2.5 or higher.")
     sys.exit(1)
 # todo: Check FontForge version
