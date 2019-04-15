@@ -53,6 +53,7 @@ Required Python libraries:
 
 * FontTools 2.5+
 * FontForge
+* lxml
 
 Run: `bin/scfbuild`
 

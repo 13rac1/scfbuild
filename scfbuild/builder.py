@@ -12,7 +12,7 @@ import sys
 import tempfile
 import time
 from distutils.version import LooseVersion
-import xml.etree.ElementTree as ET
+from lxml import etree as ET
 
 import fontTools
 from fontTools.ttLib import TTFont
@@ -89,7 +89,7 @@ class Builder(object):
         svg_list = []
 
         # Set default namespace (avoids "ns0:svg")
-        ET.register_namespace("", "http://www.w3.org/2000/svg")
+        ET.register_namespace("svg", "http://www.w3.org/2000/svg")
 
         for filepath in svg_files:
             glyph_id = self.get_glyph_id(filepath)
