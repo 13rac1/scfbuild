@@ -84,7 +84,7 @@ def add_glyphs(font, svg_filepaths, conf):
             u_ids = [int(u_id, 16) for u_id in filename.split("-")]
             # Example: (0x1f441, 0x1f5e8)
 
-            u_str = ''.join(map(unichr, u_ids))
+            u_str = ''.join(map(chr, u_ids))
             # Example: "U\0001f441U\0001f5e8"
 
             # Replace sequences with correct ZWJ/VS16 versions as needed

@@ -291,8 +291,8 @@ class Builder(object):
         # TODO: The installed version of fontTools doesn't have
         # table__n_a_m_e.setName().
         record = NameRecord()
-        # PyYAML creates strings, force to Unicode
-        record.string = unicode(text)
+        # PyYAML creates strings, which are unicode as of Python3
+        record.string = text
         record.nameID = name_id
         record.platformID = platform_id
         record.platEncID = plat_enc_id
