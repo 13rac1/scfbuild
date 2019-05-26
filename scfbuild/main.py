@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 # SCFBuild is released under the GNU General Public License v3.
@@ -12,7 +12,7 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
 import argparse
-import yaml
+import ruamel.yaml as yaml
 
 from . import __version__
 from .builder import Builder
