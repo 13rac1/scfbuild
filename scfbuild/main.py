@@ -12,7 +12,7 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
 import argparse
-import ruamel.yaml as yaml
+import yaml
 
 from . import __version__
 from .builder import Builder
