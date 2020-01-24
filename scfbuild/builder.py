@@ -292,6 +292,8 @@ class Builder(object):
         # table__n_a_m_e.setName().
         record = NameRecord()
         # PyYAML creates strings, which are unicode as of Python3
+        if sys.version_info.major == 2:
+            text = unicode(text)
         record.string = text
         record.nameID = name_id
         record.platformID = platform_id
