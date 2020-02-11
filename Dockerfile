@@ -6,3 +6,5 @@ RUN pip install --trusted-host=pypi.org --trusted-host=files.pythonhosted.org fo
 RUN pip install --trusted-host=pypi.org --trusted-host=files.pythonhosted.org pyyaml
 RUN pip install --trusted-host=pypi.org --trusted-host=files.pythonhosted.org lxml
 RUN apt-get install fontforge python-fontforge -y
+
+COPY . /scfbuild
