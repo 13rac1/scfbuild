@@ -90,6 +90,23 @@ optional arguments:
   -V, --version         print version information
 ```
 
+## Docker
+
+If you don't want to install the required Python libraries from above locally on your machine, then you can use the provided Docker container, which bundles nicely all requirements.
+
+1. Install [Docker](https://www.docker.com/)
+
+2. Build Docker container: `docker build -t scfbuild .` 
+3. Run and share folder with container:
+
+```bash
+$ cd path/to/repo/scfbuild
+$ docker run --interactive --tty --rm --volume $PWD:/wd --workdir /wd scfbuild:latest bash
+# now you can use bin/scfbuild via the docker container
+$ bin/scfbuild --help
+```
+
+
 
 ## Other Tools
 `scfbuild` softens the learning curve for font creation, but cannot replace more
