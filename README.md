@@ -75,6 +75,7 @@ optional arguments:
   -s DIR, --color-svg-dir DIR
                         directory of SVGinOT color SVG glyphs to add to the
                         font.
+  --glyph-only					generate font with no-color SVG glyphs only 
   --transform TRANSFORM
                         add a transform to the <svg> tag of each color SVG.
                         Example "translate(0 -1638) scale(2.048)"

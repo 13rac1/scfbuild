@@ -69,9 +69,14 @@ class Builder(object):
 
         logger.info("Reading intermediate font file")
         self.font = TTFont(tmp_file)
-        logger.info("Adding SVGinOT SVG files")
         # TODO: Validate color SVGs
-        self.add_color_svg()
+        
+        if self.conf['glyph_only'] == False:
+            logger.info("Adding SVGinOT SVG files")
+            self.add_color_svg()
+        else:
+            logger.info("Not Adding SVGinOT SVG files")
+
         self.add_name_table()
         logger.info("Saving output file: %s", self.conf['output_file'])
         self.font.save(self.conf['output_file'])
