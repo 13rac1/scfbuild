@@ -263,7 +263,11 @@ class Builder(object):
                 ('url_vendor', NR.URL_VENDOR),
                 ('url_designer', NR.URL_DESIGNER),
                 ('license', NR.LICENSE),
-                ('url_license', NR.URL_LICENSE)):
+                ('url_license', NR.URL_LICENSE),
+                ('typographic_family', NR.TYPOGRAPHIC_FAMILY),
+                ('typographic_subfamily', NR.TYPOGRAPHIC_SUBFAMILY),
+                ('wws_family', NR.WWS_FAMILY),
+                ('wws_subfamily', NR.WWS_SUBFAMILY)):
             if key in tn:
                 self.add_name_records(tn[key], name_id)
 
