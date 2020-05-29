@@ -12,7 +12,7 @@ import sys
 import tempfile
 import time
 from distutils.version import LooseVersion
-import xml.etree.ElementTree as ET
+from lxml import etree as ET
 
 import fontTools
 from fontTools.ttLib import TTFont
@@ -69,9 +69,14 @@ class Builder(object):
 
         logger.info("Reading intermediate font file")
         self.font = TTFont(tmp_file)
-        logger.info("Adding SVGinOT SVG files")
         # TODO: Validate color SVGs
-        self.add_color_svg()
+        
+        if self.conf['glyph_only'] == False:
+            logger.info("Adding SVGinOT SVG files")
+            self.add_color_svg()
+        else:
+            logger.info("Not Adding SVGinOT SVG files")
+
         self.add_name_table()
         logger.info("Saving output file: %s", self.conf['output_file'])
         self.font.save(self.conf['output_file'])
@@ -89,7 +94,7 @@ class Builder(object):
         svg_list = []
 
         # Set default namespace (avoids "ns0:svg")
-        ET.register_namespace("", "http://www.w3.org/2000/svg")
+        ET.register_namespace("svg", "http://www.w3.org/2000/svg")
 
         for filepath in svg_files:
             glyph_id = self.get_glyph_id(filepath)
@@ -258,7 +263,11 @@ class Builder(object):
                 ('url_vendor', NR.URL_VENDOR),
                 ('url_designer', NR.URL_DESIGNER),
                 ('license', NR.LICENSE),
-                ('url_license', NR.URL_LICENSE)):
+                ('url_license', NR.URL_LICENSE),
+                ('typographic_family', NR.TYPOGRAPHIC_FAMILY),
+                ('typographic_subfamily', NR.TYPOGRAPHIC_SUBFAMILY),
+                ('wws_family', NR.WWS_FAMILY),
+                ('wws_subfamily', NR.WWS_SUBFAMILY)):
             if key in tn:
                 self.add_name_records(tn[key], name_id)
 

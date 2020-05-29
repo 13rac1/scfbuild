@@ -53,6 +53,7 @@ Required Python libraries:
 
 * FontTools 2.5+
 * FontForge
+* lxml
 
 Run: `bin/scfbuild`
 
@@ -74,6 +75,7 @@ optional arguments:
   -s DIR, --color-svg-dir DIR
                         directory of SVGinOT color SVG glyphs to add to the
                         font.
+  --glyph-only					generate font with no-color SVG glyphs only 
   --transform TRANSFORM
                         add a transform to the <svg> tag of each color SVG.
                         Example "translate(0 -1638) scale(2.048)"
@@ -88,6 +90,23 @@ optional arguments:
   -v, --verbose         print detailed debug information
   -V, --version         print version information
 ```
+
+## Docker
+
+If you don't want to install the required Python libraries from above locally on your machine, then you can use the provided Docker container, which bundles nicely all requirements.
+
+1. Install [Docker](https://www.docker.com/)
+
+2. Build Docker container: `docker build -t scfbuild .` 
+3. Run and share folder with container:
+
+```bash
+$ cd path/to/repo/scfbuild
+$ docker run --interactive --tty --rm --volume $PWD:/wd --workdir /wd scfbuild:latest bash
+# now you can use bin/scfbuild via the docker container
+$ bin/scfbuild --help
+```
+
 
 
 ## Other Tools

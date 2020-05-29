@@ -28,6 +28,10 @@ def main():
                         dest='glyph_svg_dir',
                         metavar='DIR',
                         help='directory of regular no-color SVG glyphs to add to the font')
+    parser.add_argument('--glyph-only',
+                        dest='glyph_only',
+                        action='store_true',
+                        help='generate font with no-color SVG glyphs only')
     parser.add_argument('-s', '--color-svg-dir',
                         dest='color_svg_dir',
                         metavar='DIR',
@@ -89,6 +93,8 @@ def main():
         conf['table_name'] = {}
     if 'verbose' not in conf:
         conf['verbose'] = False
+    if 'glyph_only' not in conf:
+        conf['glyph_only'] = False
 
     # Command line options override YAML
     if args.output:
@@ -101,6 +107,8 @@ def main():
         conf['color_svg_transform'] = args.transform
     if args.verbose:
         conf['verbose'] = True
+    if args.glyph_only:
+        conf['glyph_only'] = args.glyph_only
 
     # Be sure family name, subfamily, and version are set to something.
     if 'family' not in conf['table_name'] or args.family is not default_family:
