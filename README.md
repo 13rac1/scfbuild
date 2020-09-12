@@ -34,6 +34,7 @@ Microsoft color font formats are not supported.
 [7]: https://github.com/xerographer/reinebow-color-font
 
 ## What is SVGinOT?
+
 *SVG in Open Type* is a standard by Adobe and Mozilla for color OpenType
 and Open Font Format fonts. It allows font creators to embed complete SVG files
 within a font enabling full color and even animations. There are more details in
@@ -47,12 +48,23 @@ SVGinOT Demos (Firefox only):
 [8]: https://www.w3.org/2013/10/SVG_in_OpenType/
 [9]: https://www.microsoft.com/typography/otspec/svg.htm
 
+## Setup - Linux
+
+Ubuntu 20.04 LTS / Mint 20
+
+```bash
+sudo apt-get update
+sudo apt-get install fontforge \
+  python3-fontforge python3-fonttools python3-pip python3-yaml
+sudo pip3 install fonttools
+```
+
 ## Usage - Linux
 
-Required Python libraries:
+Required Python 3 libraries:
 
-* FontTools 2.5+
-* FontForge
+* FontTools 4.5+
+* FontForge 20190801+
 
 Run: `bin/scfbuild`
 
@@ -88,7 +100,6 @@ optional arguments:
   -v, --verbose         print detailed debug information
   -V, --version         print version information
 ```
-
 
 ## Other Tools
 `scfbuild` softens the learning curve for font creation, but cannot replace more

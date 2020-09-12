@@ -10,6 +10,7 @@ from __future__ import (absolute_import, division, print_function,
 import logging
 import fontforge
 import psMat
+import sys
 
 from . import util
 from .util import FONT_EM, DEFAULT_GLYPH_WIDTH
@@ -72,7 +73,7 @@ def add_glyphs(font, svg_filepaths, conf):
 
         # If code point is -1, then the final name is not a simple unicode id
         # so make a glyph for use with ligatures
-        if codepoint is -1:
+        if codepoint == -1:
             # Example: 1f441-1f5e8.svg
 
             # Create a gylph without a defined code point
@@ -84,7 +85,11 @@ def add_glyphs(font, svg_filepaths, conf):
             u_ids = [int(u_id, 16) for u_id in filename.split("-")]
             # Example: (0x1f441, 0x1f5e8)
 
-            u_str = ''.join(map(unichr, u_ids))
+            if sys.version_info.major == 2:
+                # Python 2
+                u_str = ''.join(map(unichr, u_ids))
+            else:
+                u_str = ''.join(map(chr, u_ids))
             # Example: "U\0001f441U\0001f5e8"
 
             # Replace sequences with correct ZWJ/VS16 versions as needed

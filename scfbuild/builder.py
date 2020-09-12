@@ -162,7 +162,7 @@ class Builder(object):
             # If that doesn't work check for a Ligature Glyph
             glyph_id = self.font.getGlyphID(filename)
 
-            if glyph_id is -1:
+            if glyph_id == -1:
                 logger.warning("No Glyph ID found for: %s (Note: A regular "
                                "glyph is required for each color glyph)", filepath)
 
@@ -182,7 +182,7 @@ class Builder(object):
                 for codepoint, name in subtable.cmap.items():
                     # NOTE: May overwrite previous values
                     codepoints[codepoint] = name
-        if len(codepoints) is 0:
+        if len(codepoints) == 0:
             raise NoCodePointsException(
                 'No Unicode IDs/CodePoints found in font.')
 
@@ -291,8 +291,10 @@ class Builder(object):
         # TODO: The installed version of fontTools doesn't have
         # table__n_a_m_e.setName().
         record = NameRecord()
-        # PyYAML creates strings, force to Unicode
-        record.string = unicode(text)
+        # PyYAML creates strings, which are unicode as of Python3
+        if sys.version_info.major == 2:
+            text = unicode(text)
+        record.string = text
         record.nameID = name_id
         record.platformID = platform_id
         record.platEncID = plat_enc_id
