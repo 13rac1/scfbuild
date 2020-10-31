@@ -27,6 +27,8 @@ from .constants import name_record as NR
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
+PYTHON_2 = sys.version_info.major == 2
+
 # Support for SVG tables was added to fontTools in version 2.5
 if LooseVersion('2.5') > LooseVersion(fontTools.version):
     logger.exception("The FontTools module version must be 2.5 or higher.")
@@ -292,7 +294,7 @@ class Builder(object):
         # table__n_a_m_e.setName().
         record = NameRecord()
         # PyYAML creates strings, which are unicode as of Python3
-        if sys.version_info.major == 2:
+        if PYTHON_2:
             text = unicode(text)
         record.string = text
         record.nameID = name_id

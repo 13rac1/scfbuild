@@ -18,6 +18,7 @@ from .unicode import ZWJ_INT, VS16_INT, ZWJ_SEQUENCES
 
 logger = logging.getLogger(__name__)
 
+PYTHON_2 = sys.version_info.major == 2
 
 def create_font(conf):
     """
@@ -85,8 +86,7 @@ def add_glyphs(font, svg_filepaths, conf):
             u_ids = [int(u_id, 16) for u_id in filename.split("-")]
             # Example: (0x1f441, 0x1f5e8)
 
-            if sys.version_info.major == 2:
-                # Python 2
+            if PYTHON_2:
                 u_str = ''.join(map(unichr, u_ids))
             else:
                 u_str = ''.join(map(chr, u_ids))
