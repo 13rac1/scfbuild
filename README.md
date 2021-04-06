@@ -97,7 +97,7 @@ If you don't want to install the required Python libraries from above locally on
 
 1. Install [Docker](https://www.docker.com/)
 
-2. Build Docker container: `docker build -t scfbuild .` 
+2. Either A) build the container on your onw: `docker build -t scfbuild .` or B) pull the latest published container: `docker pull ghcr.io/b-g/scfbuild/scfbuild:latest`
 3. Run and share folder with container:
 
 ```bash
