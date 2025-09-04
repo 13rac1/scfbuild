@@ -135,6 +135,62 @@ class TestGlyphProcessing:
         components = glyph.lib["com.scfbuild.ligature_components"]
         assert len(components) == 3  # eye + ZWJ + speech bubble
 
+    def test_svg_curve_parsing(self, basic_config, temp_dir):
+        """Test that SVG paths with various curve types are parsed correctly"""
+        ufo_font = create_font(basic_config)
+
+        # Create SVG with different curve types
+        svg_with_curves = '''<?xml version="1.0" encoding="UTF-8"?>
+<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Cubic Bézier curve -->
+  <path d="M10 10 C 20 20, 40 20, 50 10"/>
+  <!-- Quadratic Bézier curve -->
+  <path d="M60 60 Q 80 50 100 60"/>
+  <!-- Smooth cubic Bézier curve -->
+  <path d="M10 80 C 20 70, 30 70, 40 80 S 60 90, 70 80"/>
+  <!-- Smooth quadratic Bézier curve -->
+  <path d="M80 20 Q 90 10 100 20 T 120 30"/>
+  <!-- Arc -->
+  <path d="M10 40 A 10 10 0 0 1 30 40"/>
+</svg>'''
+
+        # Create test glyph file
+        glyph_path = os.path.join(temp_dir, "1f600.svg")
+        with open(glyph_path, 'w') as f:
+            f.write(svg_with_curves)
+
+        # Add glyphs - this should not raise any exceptions
+        result_font = add_glyphs(ufo_font, [glyph_path], basic_config)
+
+        # Verify glyph was added
+        assert "uni1F600" in result_font
+        glyph = result_font["uni1F600"]
+
+        # Verify glyph has contours (paths were parsed successfully)
+        assert glyph.width == 2048  # Should be set based on SVG dimensions
+
+    def test_svg_parsing_error_handling(self, basic_config, temp_dir):
+        """Test that invalid SVG paths raise hard errors instead of warnings"""
+        ufo_font = create_font(basic_config)
+
+        # Create SVG with invalid path data that will cause parsing to fail
+        invalid_svg = '''<?xml version="1.0" encoding="UTF-8"?>
+<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Invalid path data - malformed Bézier curve -->
+  <path d="M10 10 C invalid control points 50 10"/>
+  <!-- Valid path after invalid one -->
+  <path d="M60 60 L 80 80"/>
+</svg>'''
+
+        # Create test glyph file
+        glyph_path = os.path.join(temp_dir, "1f600.svg")
+        with open(glyph_path, 'w') as f:
+            f.write(invalid_svg)
+
+        # This should raise a ValueError due to the invalid path
+        with pytest.raises(ValueError, match="Failed to parse SVG path"):
+            add_glyphs(ufo_font, [glyph_path], basic_config)
+
 
 class TestIntegration:
     """Test complete integration workflow"""

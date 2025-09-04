@@ -457,20 +457,21 @@ def _import_svg_outlines(glyph, filepath):
 
                 pen = UFOPen(glyph.getPen())
 
-                # Parse the SVG path data
-                path = parse_path(path_data)
-                path.draw(pen)
+                # Parse the SVG path data and draw directly to the pen
+                # parse_path takes (pathdef, pen) and calls pen methods directly
+                parse_path(path_data, pen)
 
-                logger.debug("Successfully parsed SVG path with %d commands", len(path))
+                logger.debug("Successfully parsed SVG path")
             except Exception as path_error:
-                logger.warning(
-                    "Failed to parse SVG path '%s': %s", path_data[:50], path_error
-                )
+                error_msg = f"Failed to parse SVG path '{path_data[:50]}...': {path_error}"
+                logger.error(error_msg)
+                raise ValueError(error_msg) from path_error
 
         logger.debug("Imported %d paths from SVG: %s", len(paths), filepath)
 
     except Exception as e:
         logger.error("Failed to import SVG outlines from %s: %s", filepath, e)
+        raise
 
 
 def _cleanup_glyph(glyph):
@@ -519,19 +520,43 @@ def _apply_glyph_transformations(glyph, conf):
 class UFOPen:
     """
     A pen that draws to UFO glyph contours.
+    Converts quadratic Bézier curves to cubic Bézier curves.
     """
 
     def __init__(self, glyph_pen):
         self.glyph_pen = glyph_pen
+        self.current_pos = (0, 0)
 
     def moveTo(self, point):
-        self.glyph_pen.moveTo((point[0], point[1]))
+        self.current_pos = (point[0], point[1])
+        self.glyph_pen.moveTo(self.current_pos)
 
     def lineTo(self, point):
-        self.glyph_pen.lineTo((point[0], point[1]))
+        self.current_pos = (point[0], point[1])
+        self.glyph_pen.lineTo(self.current_pos)
 
     def curveTo(self, p1, p2, p3):
-        self.glyph_pen.curveTo((p1[0], p1[1]), (p2[0], p2[1]), (p3[0], p3[1]))
+        self.current_pos = (p3[0], p3[1])
+        self.glyph_pen.curveTo((p1[0], p1[1]), (p2[0], p2[1]), self.current_pos)
+
+    def qCurveTo(self, p1, p2):
+        """
+        Convert quadratic Bézier curve to cubic Bézier curve.
+        Quadratic: start -> p1 (control) -> p2 (end)
+        Cubic: start -> cp1 -> cp2 -> p2
+        """
+        start_x, start_y = self.current_pos
+        p1_x, p1_y = p1
+        p2_x, p2_y = p2
+
+        # Convert quadratic to cubic Bézier control points
+        cp1_x = start_x + (2.0/3.0) * (p1_x - start_x)
+        cp1_y = start_y + (2.0/3.0) * (p1_y - start_y)
+        cp2_x = p2_x + (2.0/3.0) * (p1_x - p2_x)
+        cp2_y = p2_y + (2.0/3.0) * (p1_y - p2_y)
+
+        self.current_pos = (p2_x, p2_y)
+        self.glyph_pen.curveTo((cp1_x, cp1_y), (cp2_x, cp2_y), self.current_pos)
 
     def closePath(self):
         self.glyph_pen.closePath()
