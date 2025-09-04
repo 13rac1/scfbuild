@@ -6,7 +6,7 @@ Test script for basic UFO font creation functionality
 import os
 import tempfile
 import logging
-from scfbuild.ufo_builder import create_font, compile_to_ttf
+from scfbuild.ufo_builder import create_font, compile_to_ttf, add_glyphs
 
 # Set up logging
 logging.basicConfig(level=logging.DEBUG)
@@ -124,15 +124,86 @@ def test_font_saving():
             pass
 
 
+def test_add_glyphs_functionality():
+    """Test the add_glyphs function with mock SVG files"""
+    print("\nTesting add_glyphs functionality...")
+
+    # Create test configuration
+    conf = {
+        "family": "TestFont",
+        "style": "Regular",
+        "width_space": 512
+    }
+
+    # Create UFO font
+    ufo_font = create_font(conf)
+
+    # Create temporary SVG files for testing
+    import tempfile
+    import os
+
+    svg_files = []
+    try:
+        # Create a simple SVG file for testing (regular glyph: grinning face emoji)
+        svg_content = '''<?xml version="1.0" encoding="UTF-8"?>
+<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg">
+  <path d="M10 10 L90 10 L90 90 L10 90 Z"/>
+</svg>'''
+
+        # Create properly named SVG files
+        temp_dir = tempfile.mkdtemp()
+        regular_svg = os.path.join(temp_dir, "1f600.svg")
+        ligature_svg = os.path.join(temp_dir, "1f441-1f5e8.svg")
+
+        with open(regular_svg, 'w') as f:
+            f.write(svg_content)
+        svg_files.append(regular_svg)
+
+        with open(ligature_svg, 'w') as f:
+            f.write(svg_content)
+        svg_files.append(ligature_svg)
+
+        # Test add_glyphs function
+        result_font = add_glyphs(ufo_font, svg_files, conf)
+
+        # Verify glyphs were added
+        assert len(result_font) > 6  # Should have more than just the basic glyphs
+        print(f"✓ Added glyphs to font, now has {len(result_font)} total glyphs")
+
+        # Test compilation with added glyphs
+        tt_font = compile_to_ttf(result_font)
+        glyf_table = tt_font['glyf']
+        glyph_names_in_font = list(glyf_table.glyphs.keys())
+        print(f"✓ Compiled TTF with {len(glyph_names_in_font)} glyphs")
+
+        return True
+
+    except Exception as e:
+        print(f"✗ add_glyphs test FAILED: {e}")
+        import traceback
+        traceback.print_exc()
+        return False
+
+    finally:
+        # Clean up temporary directory
+        try:
+            import shutil
+            if 'temp_dir' in locals() and os.path.exists(temp_dir):
+                shutil.rmtree(temp_dir)
+        except OSError:
+            pass
+
+
 if __name__ == "__main__":
-    print("Running Phase 1 validation tests...\n")
+    print("Running Phase 1 and Phase 3 validation tests...\n")
 
     success1 = test_basic_font_creation()
     success2 = test_font_saving()
+    success3 = test_add_glyphs_functionality()
 
-    if success1 and success2:
-        print("\n🎉 All Phase 1 tests PASSED!")
-        print("Basic UFO font creation is working correctly.")
+    if success1 and success2 and success3:
+        print("\n🎉 All Phase 1 and Phase 3 tests PASSED!")
+        print("Basic UFO font creation and glyph processing are working correctly.")
     else:
         print("\n❌ Some tests failed. Please check the implementation.")
         exit(1)

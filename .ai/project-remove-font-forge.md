@@ -41,16 +41,16 @@ Replace the system dependency on FontForge with pip-installable `ufo2ft` library
 - [x] Create basic UFO font creation utilities
 
 ### Phase 2: Core Font Creation
-- [ ] Implement `create_font()` equivalent using UFO objects
-- [ ] Add basic glyph creation (.notdef, .null, CR, space, ZWJ, VS16)
-- [ ] Implement Unicode encoding setup (equivalent to `font.encoding = 'UnicodeFull'`)
-- [ ] Set up font EM size (`font.em = FONT_EM`)
+- [x] Implement `create_font()` equivalent using UFO objects
+- [x] Add basic glyph creation (.notdef, .null, CR, space, ZWJ, VS16)
+- [x] Implement Unicode encoding setup (equivalent to `font.encoding = 'UnicodeFull'`)
+- [x] Set up font EM size (`font.em = FONT_EM`)
 
 ### Phase 3: Glyph Processing
-- [ ] Implement `add_glyphs()` function for regular glyphs
-- [ ] Convert SVG import from FontForge to UFO format
-- [ ] Handle glyph width calculations and transformations
-- [ ] Implement glyph operations (removeOverlap, simplify, addExtrema)
+- [x] Implement `add_glyphs()` function for regular glyphs
+- [x] Convert SVG import from FontForge to UFO format
+- [x] Handle glyph width calculations and transformations
+- [x] Implement glyph operations (removeOverlap, simplify, addExtrema)
 
 ### Phase 4: Ligature Support
 - [ ] Implement ligature glyph creation without codepoints
