@@ -35,10 +35,10 @@ Replace the system dependency on FontForge with pip-installable `ufo2ft` library
 ## Implementation Tasks
 
 ### Phase 1: Setup and Infrastructure
-- [ ] Create new module `scfbuild/ufo_builder.py` to replace `fforge.py`
-- [ ] Install required dependencies: `ufoLib2`, `ufo2ft`
-- [ ] Set up test environment to validate font generation
-- [ ] Create basic UFO font creation utilities
+- [x] Create new module `scfbuild/ufo_builder.py` to replace `fforge.py`
+- [x] Install required dependencies: `ufoLib2`, `ufo2ft`
+- [x] Set up test environment to validate font generation
+- [x] Create basic UFO font creation utilities
 
 ### Phase 2: Core Font Creation
 - [ ] Implement `create_font()` equivalent using UFO objects
