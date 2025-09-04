@@ -2,15 +2,12 @@
 # SCFBuild is released under the GNU General Public License v3.
 # See LICENSE.txt in the project root directory.
 
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
-
 # ZERO WIDTH JOINER (ZWJ)
-ZWJ_INT = 0x200d
-ZWJ = '\u200d'
+ZWJ_INT = 0x200D
+ZWJ = "\u200d"
 # VARIATION SELECTOR-16 - Used as emoji variation selector.
-VS16_INT = 0xfe0f
-VS16 = '\ufe0f'
+VS16_INT = 0xFE0F
+VS16 = "\ufe0f"
 
 # A list of all ZWJ indexed by the no ZJW/EVS sequence.
 # Details: http://unicode.org/emoji/charts/emoji-zwj-sequences.html

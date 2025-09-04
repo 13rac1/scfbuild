@@ -2,9 +2,6 @@
 # SCFBuild is released under the GNU General Public License v3.
 # See LICENSE.txt in the project root directory.
 
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
-
 import glob
 import os
 import re
@@ -23,7 +20,7 @@ SVG_TRANSFORM_SCALE = 2.048
 def codepoint_from_filepath(filepath):
     (filename, _) = os.path.splitext(os.path.basename(filepath))
 
-    if '-' in filename:
+    if "-" in filename:
         return (-1, filename)
 
     # Convert unicode filename to decimal.
@@ -33,7 +30,7 @@ def codepoint_from_filepath(filepath):
 
 
 def get_svg_filepaths(svg_dir):
-    return [filename for filename in glob.glob(os.path.join(svg_dir, '*.svg'))]
+    return [filename for filename in glob.glob(os.path.join(svg_dir, "*.svg"))]
 
 
 def read_file(file_path):
@@ -52,12 +49,12 @@ def get_dimensions(svg_filepath):
 
     # Try to get the height/width attribs
     try:
-        height = root.attrib['height']
-        width = root.attrib['width']
+        height = root.attrib["height"]
+        width = root.attrib["width"]
     except KeyError:
         # Try to get the viewBox. Format: 0 0 200 200
         # Todo: Can fail with key error
-        dims = root.attrib['viewBox'].split(' ')
+        dims = root.attrib["viewBox"].split(" ")
         height = dims[2]
         width = dims[3]
 
