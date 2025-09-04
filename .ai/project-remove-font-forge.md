@@ -65,11 +65,11 @@ Replace the system dependency on FontForge with pip-installable `ufo2ft` library
 - [x] Validate font compilation output
 
 ### Phase 6: Integration and Testing
-- [ ] Update `builder.py` to use new UFO-based font creation
-- [ ] Modify build pipeline to work with in-memory TTFont objects
-- [ ] **Keep existing color SVG addition logic** - add SVGs to compiled font object
-- [ ] Test font generation with sample inputs
-- [ ] Validate generated fonts in font viewers/editors
+- [x] Update `builder.py` to use new UFO-based font creation
+- [x] Modify build pipeline to work with in-memory TTFont objects
+- [x] **Keep existing color SVG addition logic** - add SVGs to compiled font object
+- [x] Test font generation with sample inputs
+- [x] Validate generated fonts in font viewers/editors
 
 ### Phase 7: Cleanup and Documentation
 - [ ] Remove FontForge dependency from README

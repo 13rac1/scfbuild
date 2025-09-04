@@ -296,17 +296,129 @@ def test_ligature_support():
             pass
 
 
+def test_complete_font_generation():
+    """Test the complete font generation pipeline using the Builder class"""
+    print("\nTesting complete font generation pipeline...")
+
+    # Create test configuration
+    import tempfile
+    import os
+
+    temp_dir = tempfile.mkdtemp()
+    try:
+        # Create directories for test SVG files
+        glyph_dir = os.path.join(temp_dir, "glyphs")
+        color_dir = os.path.join(temp_dir, "colors")
+        os.makedirs(glyph_dir)
+        os.makedirs(color_dir)
+
+        # Create test SVG files
+        svg_content = '''<?xml version="1.0" encoding="UTF-8"?>
+<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg">
+  <path d="M10 10 L90 10 L90 90 L10 90 Z"/>
+</svg>'''
+
+        # Create a glyph SVG
+        with open(os.path.join(glyph_dir, "1f600.svg"), 'w') as f:
+            f.write(svg_content)
+
+        # Create a color SVG
+        with open(os.path.join(color_dir, "1f600.svg"), 'w') as f:
+            f.write(svg_content)
+
+        # Create output path
+        output_file = os.path.join(temp_dir, "test_output.ttf")
+
+        # Create configuration
+        conf = {
+            "family": "TestCompleteFont",
+            "style": "Regular",
+            "glyph_svg_dir": glyph_dir,
+            "color_svg_dir": color_dir,
+            "output_file": output_file,
+            "width_space": 512,
+            "verbose": True,
+            "table_name": {
+                "family": "TestCompleteFont",
+                "subfamily": "Regular",
+                "version": "1.0",
+                "copyright": "Test Font",
+                "manufacturer": "Test Manufacturer",
+                "designer": "Test Designer",
+                "description": "Test font for Phase 6 validation",
+                "url_vendor": "https://example.com",
+                "url_designer": "https://example.com",
+                "license": "Test License",
+                "url_license": "https://example.com",
+                "typographic_family": "TestCompleteFont",
+                "typographic_subfamily": "Regular",
+                "wws_family": "TestCompleteFont",
+                "wws_subfamily": "Regular"
+            }
+        }
+
+        # Test the complete Builder workflow
+        from scfbuild.builder import Builder
+        builder = Builder(conf)
+        result = builder.run()
+
+        # Verify the build was successful
+        assert result == 0, "Font build should return success (0)"
+        assert os.path.exists(output_file), f"Output file should exist: {output_file}"
+
+        # Verify the output file has reasonable size
+        file_size = os.path.getsize(output_file)
+        assert file_size > 1000, f"Output file seems too small: {file_size} bytes"
+
+        # Try to load the generated font to verify it's valid
+        from fontTools.ttLib import TTFont
+        tt_font = TTFont(output_file)
+
+        # Basic validation
+        assert 'glyf' in tt_font, "Generated font should have glyf table"
+        assert 'cmap' in tt_font, "Generated font should have cmap table"
+        assert 'SVG ' in tt_font, "Generated font should have SVG table for color glyphs"
+
+        # Check that our test glyph is present
+        glyf_table = tt_font['glyf']
+        assert 'uni1F600' in glyf_table.glyphs, "Test glyph should be present in font"
+
+        print(f"✓ Successfully generated complete font: {output_file}")
+        print(f"✓ Font size: {file_size} bytes")
+        print(f"✓ Font contains {len(glyf_table.glyphs)} glyphs")
+        print(f"✓ Font includes SVG color table")
+
+        return True
+
+    except Exception as e:
+        print(f"✗ Complete font generation test FAILED: {e}")
+        import traceback
+        traceback.print_exc()
+        return False
+
+    finally:
+        # Clean up
+        try:
+            import shutil
+            if temp_dir and os.path.exists(temp_dir):
+                shutil.rmtree(temp_dir)
+        except OSError:
+            pass
+
+
 if __name__ == "__main__":
-    print("Running Phase 1, Phase 3, and Phase 4 validation tests...\n")
+    print("Running complete Phase 1-6 validation tests...\n")
 
     success1 = test_basic_font_creation()
     success2 = test_font_saving()
     success3 = test_add_glyphs_functionality()
     success4 = test_ligature_support()
+    success5 = test_complete_font_generation()
 
-    if success1 and success2 and success3 and success4:
-        print("\n🎉 All Phase 1, Phase 3, and Phase 4 tests PASSED!")
-        print("Basic UFO font creation, glyph processing, and ligature support are working correctly.")
+    if success1 and success2 and success3 and success4 and success5:
+        print("\n🎉 All Phase 1-6 tests PASSED!")
+        print("Complete UFO-based font generation pipeline is working correctly.")
+        print("Builder integration, glyph processing, ligature support, and color SVG addition all functional.")
     else:
         print("\n❌ Some tests failed. Please check the implementation.")
         exit(1)

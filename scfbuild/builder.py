@@ -16,7 +16,7 @@ from fontTools.ttLib import TTFont
 from fontTools.ttLib.tables.S_V_G_ import table_S_V_G_
 from fontTools.ttLib.tables._n_a_m_e import NameRecord, table__n_a_m_e
 
-from . import fforge
+from . import ufo_builder
 from . import util
 from .util import FONT_EM
 from .constants import name_record as NR
@@ -44,37 +44,25 @@ class Builder(object):
             logging.getLogger().setLevel(logging.DEBUG)
 
     def run(self):
-        logger.info("Creating a new font")
-        ff_font = fforge.create_font(self.conf)
+        logger.info("Creating a new UFO font")
+        ufo_font = ufo_builder.create_font(self.conf)
 
         # Find and add regular glyphs
         svg_filepaths = util.get_svg_filepaths(self.conf["glyph_svg_dir"])
         # TODO: Validate regular SVGs
         logger.info("Adding glyphs and ligatures")
-        fforge.add_glyphs(ff_font, svg_filepaths, self.conf)
+        ufo_builder.add_glyphs(ufo_font, svg_filepaths, self.conf)
 
-        tmp_dir = tempfile.mkdtemp()
-        tmp_file = os.path.join(tmp_dir, "tmp.ttf")
-        logger.debug("Using temp file: %s", tmp_file)
+        # Compile UFO font to TTF (in-memory, no intermediate files)
+        logger.info("Compiling UFO font to TTF")
+        self.font = ufo_builder.compile_to_ttf(ufo_font)
 
-        # TODO: Validate ligature tables to avoid warning during generate
-        # "Lookup subtable contains unused glyph NAME making the whole subtable invalid"
-        logger.info("Generating intermediate font file")
-        ff_font.generate(tmp_file)
-        del ff_font
-
-        logger.info("Reading intermediate font file")
-        self.font = TTFont(tmp_file)
         logger.info("Adding SVGinOT SVG files")
         # TODO: Validate color SVGs
         self.add_color_svg()
         self.add_name_table()
         logger.info("Saving output file: %s", self.conf["output_file"])
         self.font.save(self.conf["output_file"])
-
-        # Cleaning Up
-        os.remove(tmp_file)
-        os.rmdir(tmp_dir)
 
         logger.info("Done!")
         # 0 for success
