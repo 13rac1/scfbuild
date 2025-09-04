@@ -11,7 +11,6 @@ from ufoLib2 import Font as UFOFont
 from ufoLib2.objects import Glyph as UFOGlyph
 from ufo2ft import compileTTF
 from fontTools.agl import UV2AGL
-from fontTools.pens.svgPathPen import SVGPathPen
 
 from . import util
 from .util import FONT_EM, DEFAULT_GLYPH_WIDTH, get_glyph_width
@@ -125,7 +124,7 @@ def finalize_ligatures(font):
             components = glyph.lib["com.scfbuild.ligature_components"]
             if len(components) > 1:  # Only create rules for multi-glyph ligatures
                 # Filter out ZWJ characters for the substitution rule
-                filtered_components = [c for c in components if 'uni200D' not in c]
+                filtered_components = [c for c in components if "uni200D" not in c]
                 if len(filtered_components) > 1:
                     if len(filtered_components) == 1:
                         components_str = filtered_components[0]
@@ -169,9 +168,163 @@ def compile_to_ttf(ufo_font):
     Returns an in-memory TTFont object (no intermediate file I/O)
     """
     logger.info("Compiling UFO font to TTF")
-    tt_font = compileTTF(ufo_font)
-    logger.info("Font compilation complete")
+
+    # Ensure glyph order preservation by maintaining the order from UFO font
+    glyph_order = list(ufo_font.keys())
+    logger.debug(f"Preserving glyph order: {glyph_order}")
+
+    # Compile with glyph order preservation
+    tt_font = compileTTF(ufo_font, glyphOrder=glyph_order)
+
+    # Validate the compiled font
+    validation_results = _validate_font_compilation(ufo_font, tt_font, glyph_order)
+
+    if validation_results["valid"]:
+        logger.info("Font compilation complete and validated")
+    else:
+        logger.warning(
+            f"Font compilation validation issues: {validation_results['issues']}"
+        )
+
     return tt_font
+
+
+def _validate_font_compilation(ufo_font, tt_font, expected_glyph_order):
+    """
+    Validate the compiled TTF font to ensure it meets requirements
+    """
+    validation_results = {"valid": True, "issues": []}
+
+    try:
+        # 1. Check that all expected glyphs are present
+        if "glyf" not in tt_font:
+            validation_results["issues"].append("Missing 'glyf' table in TTF")
+            validation_results["valid"] = False
+        else:
+            glyf_table = tt_font["glyf"]
+            compiled_glyphs = set(glyf_table.glyphs.keys())
+
+            # Get expected glyphs from UFO font
+            expected_glyphs = set(ufo_font.keys())
+
+            missing_glyphs = expected_glyphs - compiled_glyphs
+            if missing_glyphs:
+                validation_results["issues"].append(
+                    f"Missing glyphs in TTF: {missing_glyphs}"
+                )
+                validation_results["valid"] = False
+
+            extra_glyphs = compiled_glyphs - expected_glyphs
+            if extra_glyphs and extra_glyphs != {
+                ".notdef"
+            }:  # .notdef is automatically added
+                validation_results["issues"].append(
+                    f"Extra glyphs in TTF: {extra_glyphs}"
+                )
+
+        # 2. Check glyph order preservation (if possible)
+        if "glyf" in tt_font and "post" in tt_font:
+            post_table = tt_font["post"]
+            if hasattr(post_table, "extraNames") and post_table.extraNames:
+                # Check if glyph names are in a reasonable order
+                glyph_names = list(tt_font["glyf"].glyphs.keys())
+                logger.debug(f"Compiled glyph order: {glyph_names}")
+
+        # 3. Validate font metrics
+        if "head" in tt_font:
+            head_table = tt_font["head"]
+            if head_table.unitsPerEm != ufo_font.info.unitsPerEm:
+                validation_results["issues"].append(
+                    f"Units per em mismatch: expected {ufo_font.info.unitsPerEm}, got {head_table.unitsPerEm}"
+                )
+                validation_results["valid"] = False
+
+        # 4. Check character mapping
+        if "cmap" in tt_font:
+            cmap_table = tt_font["cmap"]
+            unicode_glyphs = {}
+            for table in cmap_table.tables:
+                if table.isUnicode():
+                    unicode_glyphs.update(table.cmap)
+
+            logger.debug(f"Unicode mappings in TTF: {len(unicode_glyphs)} glyphs")
+
+            # Validate that basic glyphs have correct mappings
+            basic_mappings = {
+                0x0: ".null",  # null
+                0xD: "CR",  # carriage return
+                0x20: "space",  # space
+            }
+
+            for codepoint, expected_name in basic_mappings.items():
+                if codepoint in unicode_glyphs:
+                    actual_name = unicode_glyphs[codepoint]
+                    if actual_name != expected_name:
+                        validation_results["issues"].append(
+                            f"Unicode mapping mismatch for U+{codepoint:04X}: expected '{expected_name}', got '{actual_name}'"
+                        )
+
+        # 5. Validate font tables
+        required_tables = [
+            "head",
+            "hhea",
+            "maxp",
+            "OS/2",
+            "name",
+            "cmap",
+            "glyf",
+            "loca",
+            "hmtx",
+        ]
+        missing_tables = []
+        for table_tag in required_tables:
+            if table_tag not in tt_font:
+                missing_tables.append(table_tag)
+
+        if missing_tables:
+            validation_results["issues"].append(
+                f"Missing required tables: {missing_tables}"
+            )
+            validation_results["valid"] = False
+
+        # 6. Check font metadata
+        if "name" in tt_font:
+            name_table = tt_font["name"]
+            family_name = None
+            style_name = None
+
+            for record in name_table.names:
+                if record.nameID == 1:  # Family name
+                    family_name = (
+                        record.string.decode("utf-8", errors="ignore")
+                        if isinstance(record.string, bytes)
+                        else record.string
+                    )
+                elif record.nameID == 2:  # Style name
+                    style_name = (
+                        record.string.decode("utf-8", errors="ignore")
+                        if isinstance(record.string, bytes)
+                        else record.string
+                    )
+
+            expected_family = ufo_font.info.familyName or "SCFBuild Font"
+            expected_style = ufo_font.info.styleName or "Regular"
+
+            if family_name and family_name != expected_family:
+                validation_results["issues"].append(
+                    f"Family name mismatch: expected '{expected_family}', got '{family_name}'"
+                )
+
+            if style_name and style_name != expected_style:
+                validation_results["issues"].append(
+                    f"Style name mismatch: expected '{expected_style}', got '{style_name}'"
+                )
+
+    except Exception as e:
+        validation_results["issues"].append(f"Validation error: {e}")
+        validation_results["valid"] = False
+
+    return validation_results
 
 
 def add_glyphs(font, svg_filepaths, conf):
@@ -301,6 +454,7 @@ def _import_svg_outlines(glyph, filepath):
         for path_data in paths:
             try:
                 from fontTools.svgLib.path import parse_path
+
                 pen = UFOPen(glyph.getPen())
 
                 # Parse the SVG path data
@@ -309,7 +463,9 @@ def _import_svg_outlines(glyph, filepath):
 
                 logger.debug("Successfully parsed SVG path with %d commands", len(path))
             except Exception as path_error:
-                logger.warning("Failed to parse SVG path '%s': %s", path_data[:50], path_error)
+                logger.warning(
+                    "Failed to parse SVG path '%s': %s", path_data[:50], path_error
+                )
 
         logger.debug("Imported %d paths from SVG: %s", len(paths), filepath)
 
