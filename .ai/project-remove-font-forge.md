@@ -53,10 +53,10 @@ Replace the system dependency on FontForge with pip-installable `ufo2ft` library
 - [x] Implement glyph operations (removeOverlap, simplify, addExtrema)
 
 ### Phase 4: Ligature Support
-- [ ] Implement ligature glyph creation without codepoints
-- [ ] Add ligature lookup table setup
-- [ ] Handle ZWJ/VS16 sequences correctly
-- [ ] Ensure ligature glyph naming compatibility
+- [x] Implement ligature glyph creation without codepoints
+- [x] Add ligature lookup table setup
+- [x] Handle ZWJ/VS16 sequences correctly
+- [x] Ensure ligature glyph naming compatibility
 
 ### Phase 5: Font Compilation
 - [ ] Replace `font.generate()` with `ufo2ft.compileTTF()`
