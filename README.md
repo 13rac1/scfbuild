@@ -34,7 +34,7 @@ and Microsoft color font formats are not supported at this time.
   * [Multicoloure][multicoloure] - [[source][multicoloure-src]]
   * [Freizer][freizer] - [[source][freizer-src]]
 
-[twemoji-color-font]: https://github.com/eosrei/twemoji-color-font
+[twemoji-color-font]: https://github.com/13rac1/twemoji-color-font
 [reinebow]: http://xerographer.github.io/reinebow/
 [reinebow-src]: https://github.com/xerographer/reinebow-color-font
 [gradiently]: http://xerographer.github.io/gradiently/
@@ -59,23 +59,53 @@ SVGinOT Demos:
 [8]: https://www.w3.org/2013/10/SVG_in_OpenType/
 [9]: https://www.microsoft.com/typography/otspec/svg.htm
 
+## Migration from FontForge Version
+
+SCFBuild v2.0+ no longer requires FontForge as a system dependency. The new version uses pip-installable libraries (ufoLib2, ufo2ft) for better portability and easier installation.
+
+### Changes for Users
+
+* **Installation**: No more system-level FontForge installation required
+* **Dependencies**: Now uses pip-installable packages instead of system packages
+* **Performance**: Faster font compilation with in-memory processing
+* **Compatibility**: Same command-line interface and configuration format
+
+### Migration Steps
+
+1. **Update installation**:
+   ```bash
+   # Remove old system dependencies (optional)
+   sudo apt-get remove fontforge python3-fontforge
+
+   # Install new version
+   pip3 install --upgrade scfbuild
+   ```
+
+2. **Verify installation**:
+   ```bash
+   scfbuild --version
+   ```
+
+3. **Test existing workflows**: Your existing configuration files and command-line usage should work unchanged.
+
+
 ## Setup - Linux
 
-Ubuntu 20.04 LTS / Mint 20
 
 ```bash
-sudo apt-get update
-sudo apt-get install fontforge \
-  python3-fontforge python3-fonttools python3-pip python3-yaml
-sudo pip3 install fonttools
+git clone https://github.com/13rac1/scfbuild.git
+cd scfbuild
+pip3 install -e .
 ```
 
 ## Usage - Linux
 
 Required Python 3 libraries:
 
-* FontTools 4.5+
-* FontForge 20190801+
+* FontTools 4.40+
+* ufoLib2 0.16+
+* ufo2ft 2.25+
+* PyYAML 5.1+
 
 Run: `bin/scfbuild`
 
@@ -113,13 +143,17 @@ optional arguments:
 ```
 
 ## Other Tools
-`scfbuild` softens the learning curve for font creation, but cannot replace more
-advanced tools. Here are some starting points if you need more features,
-although none support color fonts at this time:
+`scfbuild` simplifies color font creation from SVG files. For more advanced font
+creation needs, consider these alternatives:
 
-* http://fontforge.github.io/en-US/
-* https://github.com/adobe-type-tools/afdko
-* https://birdfont.org/
+* **FontForge**: Traditional font editor with comprehensive features
+  * Website: http://fontforge.github.io/en-US/
+* **Adobe Font Development Kit (AFDKO)**: Professional font development tools
+  * Repository: https://github.com/adobe-type-tools/afdko
+* **BirdFont**: Modern font editor with intuitive interface
+  * Website: https://birdfont.org/
+* **fontmake**: Command-line font production from UFO sources
+  * Repository: https://github.com/googlefonts/fontmake
 
 ## License
 

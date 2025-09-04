@@ -1,6 +1,6 @@
 [project]
 name = "scfbuild"
-version = "2.0.0"
+version = "3.0.0"
 description = "SVGinOT Color Font Builder"
 readme = "README.md"
 requires-python = ">=3.9"
@@ -16,7 +16,9 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.uv]
-dev-dependencies = []
+dev-dependencies = [
+    "pytest>=8.4.2",
+]
 
 [project.scripts]
 scfbuild = "scfbuild.main:main"
